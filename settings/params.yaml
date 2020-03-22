@@ -1,0 +1,69 @@
+studies:
+    letter_spacing:
+        dir: letter_spacing_study
+        groups:
+            1: control
+        subjects:
+            control: [baan, baga, buzs, csen, cszs, daal, egfe, fada,
+                        fipa, glad, kafe, kami, koma, kosz, krri, kukr,
+                        naab, naev, nape, nesz, pavi, peju, vazo, zoad]
+        experiments:
+            et:
+                features_path: '/data/letter_spacing_study/ET_features/24subjects_0s_0s.xls'
+                conditions: [MS, NS, DS]
+                spacing_size:
+                    MS: 0.707
+                    NS: 1
+                    DS: 2
+        
+    dys:
+        dir: dys_study
+        groups:
+            1: dyslexic
+            2: control
+        subjects:
+            control: [foju, neda, buka, vikr, hoag, beni, jaga, kori,
+                        tita, keli, bama, doan, szida, csda, kocev, adre,
+                        urma, fope, mofr, koev, homa, plda, nemi, tado]
+                      
+            dyslexic: [pebe, vano, move, kodo, cski, buzs, luro, opcs,
+                        boda, mava, foti, lurov, mead, foja, rupa, komo,
+                        kani, duda, sako, elki, dobe, hlvi, road, hoor]
+        experiments:
+            et:
+                features_path: '/data/dys_study/ET_features/AllSubjects48_TextLinesWithLeftValidation_correctionType1_limitedToReading_AllLines/AllSubsAllMeasuresOnOneSheetCondsOnSepSheets.xlsx'
+                conditions: [SP1, SP2, SP3, SP4, SP5]
+                spacing_size:
+                    SP1: 0.707
+                    SP2: 1
+                    SP3: 1.3
+                    SP4: 1.6
+                    SP5: 1.9
+            3dmh:
+                data_path: '/data/dys_study/3DMH/3dmh_data.csv'
+            wais:
+                data_path: '/data/dys_study/WAIS/WAIS_data.csv'
+
+    dys_contr_2:
+        dir: dys_contr_2_study
+        groups:
+            1: control
+        subjects:
+            control: ['009833', '044846', '321319', '643438', '862169', '269257',
+                        '842608', '059694', '515155', '133288', '930517', '394107', 
+                        '667207', '414822', '331536', '048298', '135230', '424174',
+                        '319897', '927179', '612370', '213103', '284297', '103183',
+                        '528213', '320268', '163753', '356349', '366394', '217720',
+                        '390744', '050120', '205515', '822816', '303786', '638838',
+                        '093925', '587631']
+        experiments:
+            et:
+                features_path: '/data/dys_contr_2_study/ET_features/et_stats_subj_num_38/AllSubsAllMeasuresOnOneSheetCondsOnSepSheets.xlsx'
+                conditions: [SP2]
+                spacing_size:
+                    SP2: 1
+            3dmh:
+                data_path: '/data/dys_contr_2_study/3dmh/3dmh_data.csv'
+                info_path: '/data/dys_contr_2_study/3dmh/3dmh_subj_codes.csv'
+
+
