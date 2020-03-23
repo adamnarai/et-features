@@ -39,7 +39,8 @@ for study in list(p['studies'].keys()):
         for gp in list(p['studies'][study]['groups'].values()):
             for cond in p['studies'][study]['experiments']['et']['conditions']:
                 print('Running corr heatmap group: {}, cond: {}'.format(gp, cond))
-                corr_data = data[(data['condition'] == cond) & (data['group'] == gp)].loc[:, meas_list]
+                corr_data = data[(data['study'] == study) & (data['condition'] == cond) 
+                                 & (data['group'] == gp)].loc[:, meas_list]
                 
                 # Spearman correlation
                 r, pval = stats.spearmanr(corr_data)
@@ -84,7 +85,8 @@ for study in list(p['studies'].keys()):
         for gp in list(p['studies'][study]['groups'].values()):
             for cond in p['studies'][study]['experiments']['et']['conditions']:
                 print('Running scatterplots group: {}, cond: {}'.format(gp, cond))
-                corr_data = data[(data['condition'] == cond) & (data['group'] == gp)].loc[:, meas_list]
+                corr_data = data[(data['study'] == study) & (data['condition'] == cond) 
+                                 & (data['group'] == gp)].loc[:, meas_list]
                 plt_idx = 0
                 var_num = corr_data.shape[1]
                 for i in range(var_num):
