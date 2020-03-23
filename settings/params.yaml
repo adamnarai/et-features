@@ -143,7 +143,7 @@ params:
                 - St_OlvGyak_F
                 - St_OlvRitka_F
                 - St_Olvasas_Sk
-            Perc:     
+            Perc:
                 - Perc_OlvAlszo_F
                 - Perc_OlvAlszo_P
                 - Perc_FonTorles_P
@@ -161,3 +161,11 @@ params:
                 - Perc_OlvGyak_F
                 - Perc_OlvRitka_F
                 - Perc_Olvasas_Sk
+    wais:
+        meas_list:
+            - iq_verbal_proc
+            - iq_perceptual_proc
+            - iq_working_mem
+            - iq_proc_speed
+            - iq_complet_test
+
