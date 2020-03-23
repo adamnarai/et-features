@@ -1,5 +1,5 @@
 """
-3DMH correlations
+WAIS correlations
 
 @author: Adam Narai
 @email: narai.adam@gmail.com
