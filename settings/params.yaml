@@ -103,5 +103,61 @@ params:
             - Med_glisspvel
             - Med_lvglisspvel
             - Med_hvglisspvel
-
-
+    3dmh:
+        meas_list:
+            Ny:
+                - Ny_OlvAlszo_F
+                - Ny_OlvAlszo_P
+                - Ny_OlvAlszo_IRT
+                - Ny_FonTorles_P
+                - Ny_FonTorles_S
+                - Ny_RAN_betu_P
+                - Ny_RAN_betu_S
+                - Ny_RAN_szam_P
+                - Ny_RAN_szam_S
+                - Ny_RAN_kep_P
+                - Ny_RAN_kep_S
+                - Ny_SzotagTerj
+                - Ny_Corsi
+                - Ny_ReakcIdo_P
+                - Ny_ReakcIdo_S
+                - Ny_OlvGyak_F
+                - Ny_OlvGyak_P
+                - Ny_OlvRitka_F
+                - Ny_OlvRitka_P
+            St:     
+                - St_OlvAlszo_F
+                - St_OlvAlszo_P
+                - St_FonTorles_P
+                - St_FonTorles_S
+                - St_RAN_betu_S
+                - St_RAN_szam_S
+                - St_RAN_kep_S
+                - St_SzotagTerj
+                - St_Corsi
+                - St_ReakcIdo_S
+                - St_FonTud_Sk
+                - St_RAN_Sk
+                - St_NyelvEml_Sk
+                - St_TervizEml_Sk
+                - St_OlvGyak_F
+                - St_OlvRitka_F
+                - St_Olvasas_Sk
+            Perc:     
+                - Perc_OlvAlszo_F
+                - Perc_OlvAlszo_P
+                - Perc_FonTorles_P
+                - Perc_FonTorles_S
+                - Perc_RAN_betu
+                - Perc_RAN_szam
+                - Perc_RAN_kep
+                - Perc_SzotagTerj
+                - Perc_Corsi
+                - Perc_ReakcIdo
+                - Perc_FonTud_Sk
+                - Perc_RAN_Sk
+                - Perc_NyelvEml_Sk
+                - Perc_TervizEml_Sk
+                - Perc_OlvGyak_F
+                - Perc_OlvRitka_F
+                - Perc_Olvasas_Sk
