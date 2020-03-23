@@ -65,5 +65,43 @@ studies:
             3dmh:
                 data_path: '/data/dys_contr_2_study/3dmh/3dmh_data.csv'
                 info_path: '/data/dys_contr_2_study/3dmh/3dmh_subj_codes.csv'
+                
+params:
+    et:
+        meas_list:
+            - Med_rspeed_wnum
+            - Med_fixdur
+            - Med_saccamp
+            - Perc_fsacc
+            - Perc_sacc_gliss
+            - Perc_fsacc_fgliss
+            - Perc_bsacc_fgliss
+            - Med_fsaccamp
+            - Med_bsaccamp
+            - Perc_fgliss
+            - Perc_fsacc_gliss
+            - Perc_bsacc_gliss
+            - Freq_fsacc
+            - Freq_bsacc
+            - Mean_meanfixvel
+            - Mean_stdevfixvel
+            - Med_saccpdetth
+            - Med_saccdur
+            - Med_fsaccdur
+            - Med_bsaccdur
+            - Med_glissdur
+            - Med_fglissdur
+            - Med_bglissdur
+            - Med_glissamp
+            - Med_fglissamp
+            - Med_bglissamp
+            - Med_tsnum_wnum
+            - Med_fsnum_wnum
+            - Med_bsnum_wnum
+            - Med_saccpvel
+            - Perc_lvel_gliss
+            - Med_glisspvel
+            - Med_lvglisspvel
+            - Med_hvglisspvel
 
 
