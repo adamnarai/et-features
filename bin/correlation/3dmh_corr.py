@@ -13,7 +13,6 @@ import pingouin as pg
 import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
-from scipy import stats
 from matplotlib.backends.backend_pdf import PdfPages
 from na_py_tools.defaults import RESULTS_DIR, SETTINGS_DIR
 
