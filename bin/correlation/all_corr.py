@@ -47,7 +47,7 @@ os.makedirs(results_dir, exist_ok=True)
 
 
 # %% Generate pdf figures
-for study in ['dys']:
+for study in ['dys', 'dys_contr_2']:
     print('Running study: {}'.format(study))
     with PdfPages(results_dir + '/all_corr_' + study + '.pdf') as pdf:      
         # Correlation heatmaps
