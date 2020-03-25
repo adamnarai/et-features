@@ -9,15 +9,13 @@ ET feature correlations
 import os
 import yaml
 import pandas as pd
+import pingouin as pg
 import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
 from scipy import stats
 from matplotlib.backends.backend_pdf import PdfPages
 from na_py_tools.defaults import RESULTS_DIR, SETTINGS_DIR
-
-# Params
-run_regrplots = False
 
 # Load params YAML
 with open(SETTINGS_DIR + '/params.yaml') as file:
@@ -61,9 +59,9 @@ for study in ['dys']:
                                  & (data['group'] == gp)].loc[:, meas_list]
                 corr_data = corr_data.dropna(axis='columns', how='all')
                 
-                # Spearman correlation
-                r, pval = stats.spearmanr(corr_data)
-                r = corr_data.corr(method='spearman')
+                # Spearman correlation (p values in upper triangle)
+                r = corr_data.rcorr(method='spearman', stars=False, decimals=4)
+                r = r.replace('-', 1).apply(pd.to_numeric)
                 
                 # Triangle mask
                 mask = np.zeros_like(r, dtype=np.bool)
@@ -85,7 +83,7 @@ for study in ['dys']:
                 plt.close()
                 
                 # Significant r values
-                mask[(pval >= .05)] = True
+                mask[(r.T >= .05)] = True
                 fig = plt.figure(figsize=(18, 14))
                 sns.heatmap(r,
                             vmin=-1,
@@ -99,31 +97,3 @@ for study in ['dys']:
                           fontsize=18, fontweight='bold')
                 pdf.savefig()
                 plt.close()
-        
-        # Regrplots
-        if run_regrplots:
-            for gp in list(p['studies'][study]['groups'].values()):
-                for cond in p['studies'][study]['experiments']['et']['conditions']:
-                    print('Running scatterplots group: {}, cond: {}'.format(gp, cond))
-                    corr_data = data[(data['study'] == study) & (data['condition'] == cond) 
-                                      & (data['group'] == gp)].loc[:, meas_list]
-                    corr_data = corr_data.dropna(axis='columns', how='all')
-                    
-                    plt_idx = 0
-                    var_num = corr_data.shape[1]
-                    for i in range(var_num):
-                        for j in range(var_num):
-                            if not plt_idx%round(var_num/2):
-                                plt.figure(figsize=(20, 14))
-                                plt.suptitle(gp + ' - ' + cond)
-                            if j==i:
-                                plt_idx+=1
-                                continue
-                            plt.subplot(5,7,(plt_idx%round(var_num/2))+1)
-                            sns.regplot(x=list(corr_data.columns)[i], y=list(corr_data.columns)[j], data=corr_data)
-                            plt_idx+=1
-                            if not plt_idx%(round(var_num/2)):
-                                plt.tight_layout()
-                                pdf.savefig()
-                                plt.close()
-

@@ -9,12 +9,16 @@ ET feature correlations
 import os
 import yaml
 import pandas as pd
+import pingouin as pg
 import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
 from scipy import stats
 from matplotlib.backends.backend_pdf import PdfPages
 from na_py_tools.defaults import RESULTS_DIR, SETTINGS_DIR
+
+# Params
+run_regrplots = False
 
 # Load params YAML
 with open(SETTINGS_DIR + '/params.yaml') as file:
@@ -42,9 +46,9 @@ for study in list(p['studies'].keys()):
                 corr_data = data[(data['study'] == study) & (data['condition'] == cond) 
                                  & (data['group'] == gp)].loc[:, meas_list]
                 
-                # Spearman correlation
-                r, pval = stats.spearmanr(corr_data)
-                r = pd.DataFrame(r, index=corr_data.columns, columns=corr_data.columns)
+                # Spearman correlation (p values in upper triangle)
+                r = corr_data.rcorr(method='spearman', stars=False, decimals=4)
+                r = r.replace('-', 1).apply(pd.to_numeric)
                 
                 # Triangle mask
                 mask = np.zeros_like(r, dtype=np.bool)
@@ -66,7 +70,7 @@ for study in list(p['studies'].keys()):
                 plt.close()
                 
                 # Significant r values
-                mask[(pval >= .05)] = True
+                mask[(r.T >= .05)] = True
                 fig = plt.figure(figsize=(18, 14))
                 sns.heatmap(r,
                             vmin=-1,
@@ -82,26 +86,27 @@ for study in list(p['studies'].keys()):
                 plt.close()
         
         # Regrplots
-        for gp in list(p['studies'][study]['groups'].values()):
-            for cond in p['studies'][study]['experiments']['et']['conditions']:
-                print('Running scatterplots group: {}, cond: {}'.format(gp, cond))
-                corr_data = data[(data['study'] == study) & (data['condition'] == cond) 
-                                 & (data['group'] == gp)].loc[:, meas_list]
-                plt_idx = 0
-                var_num = corr_data.shape[1]
-                for i in range(var_num):
-                    for j in range(var_num):
-                        if not plt_idx%var_num:
-                            plt.figure(figsize=(20, 14))
-                            plt.suptitle(gp + ' - ' + cond)
-                        if j==i:
+        if run_regrplots:
+            for gp in list(p['studies'][study]['groups'].values()):
+                for cond in p['studies'][study]['experiments']['et']['conditions']:
+                    print('Running scatterplots group: {}, cond: {}'.format(gp, cond))
+                    corr_data = data[(data['study'] == study) & (data['condition'] == cond) 
+                                     & (data['group'] == gp)].loc[:, meas_list]
+                    plt_idx = 0
+                    var_num = corr_data.shape[1]
+                    for i in range(var_num):
+                        for j in range(var_num):
+                            if not plt_idx%var_num:
+                                plt.figure(figsize=(20, 14))
+                                plt.suptitle(gp + ' - ' + cond)
+                            if j==i:
+                                plt_idx+=1
+                                continue
+                            plt.subplot(5,7,(plt_idx%var_num)+1)
+                            sns.regplot(x=list(corr_data.columns)[i], y=list(corr_data.columns)[j], data=corr_data)
                             plt_idx+=1
-                            continue
-                        plt.subplot(5,7,(plt_idx%var_num)+1)
-                        sns.regplot(x=list(corr_data.columns)[i], y=list(corr_data.columns)[j], data=corr_data)
-                        plt_idx+=1
-                        if not plt_idx%var_num:
-                            plt.tight_layout()
-                            pdf.savefig()
-                            plt.close()
+                            if not plt_idx%var_num:
+                                plt.tight_layout()
+                                pdf.savefig()
+                                plt.close()
 

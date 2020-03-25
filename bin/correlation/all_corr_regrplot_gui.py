@@ -63,13 +63,13 @@ def plot_regrplot(study):
                                 & (data_all[study]['group'] == gp)].loc[:, valid_meas_list[study]]
     
     # Spearman correlation
-    test = pg.corr(corr_data[x_var], corr_data[y_var], method='spearman')
+    regr_stats = pg.corr(corr_data[x_var], corr_data[y_var], method='spearman')
 
     # Regrplot
     plt.figure(figsize=(7, 5))
     sns.regplot(x=x_var, y=y_var, data=corr_data)
     plt.title('study: {} | group: {} | condition: {}\n'.format(study, gp, cond)
-              + test.to_string(col_space=10))
+              + regr_stats.to_string(col_space=10))
 
 # GUI for variable selection
 window = tk.Tk()
