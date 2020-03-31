@@ -68,6 +68,92 @@ studies:
                 
 params:
     et:
+        # All measures
+        meas_list_all:
+            - Tot_sweep
+            - Med_rspeed_wnum
+            - Med_rspeed_chnum
+            - Med_rspeed_mspan
+            - Med_rspeed_tsweep
+            - Totnum_sacc
+            - Totnum_fsacc
+            - Totnum_bsacc
+            - Perc_fsacc
+            - Perc_bsacc
+            - Totnum_gliss
+            - Totnum_fgliss
+            - Totnum_bgliss
+            - Perc_fgliss
+            - Perc_bgliss
+            - Perc_sacc_gliss
+            - Perc_fsacc_gliss
+            - Perc_bsacc_gliss
+            - Perc_fsacc_fgliss
+            - Perc_fsacc_bgliss
+            - Perc_bsacc_fgliss
+            - Perc_bsacc_bgliss
+            - Totnum_lvel_gliss
+            - Totnum_hvel_gliss
+            - Perc_lvel_gliss
+            - Perc_hvel_gliss
+            - Perc_lvel_fgliss
+            - Perc_lvel_bgliss
+            - Perc_hvel_fgliss
+            - Perc_hvel_bgliss
+            - Totnum_gwcpeak
+            - Totnum_gscpeak
+            - Totnum_lvel_gwcpeak
+            - Totnum_hvel_gwcpeak
+            - Totnum_hvel_gwcpeakcorr
+            - Totnum_hvel_gscpeak
+            - Perc_gamp_critis
+            - Perc_gdur_critis
+            - Freq_fsacc
+            - Freq_bsacc
+            - Mean_meanfixvel
+            - Mean_stdevfixvel
+            - Med_saccpdetth
+            - Med_saccdur
+            - Med_fsaccdur
+            - Med_bsaccdur
+            - Med_saccamp
+            - Med_fsaccamp
+            - Med_bsaccamp
+            - Med_saccpvel
+            - Med_fsaccpvel
+            - Med_bsaccpvel
+            - Med_saccpacc
+            - Med_fsaccpacc
+            - Med_bsaccpacc
+            - Med_glissdur
+            - Med_fglissdur
+            - Med_bglissdur
+            - Med_lvglissdur
+            - Med_hvglissdur
+            - Med_glissamp
+            - Med_fglissamp
+            - Med_bglissamp
+            - Med_lvglissamp
+            - Med_hvglissamp
+            - Med_glisspvel
+            - Med_fglisspvel
+            - Med_bglisspvel
+            - Med_lvglisspvel
+            - Med_hvglisspvel
+            - Med_fixdur
+            - Med_fXpos
+            - Med_fYpos
+            - Med_tsnum_maxvisspan
+            - Med_fsnum_maxvisspan
+            - Med_bsnum_maxvisspan
+            - Med_tsnum_wnum
+            - Med_fsnum_wnum
+            - Med_bsnum_wnum
+            - Med_tsnum_chnum
+            - Med_fsnum_chnum
+            - Med_bsnum_chnum
+        
+        # Measures selected for analyses
         meas_list:
             - Med_rspeed_wnum
             - Med_fixdur
@@ -103,6 +189,7 @@ params:
             - Med_glisspvel
             - Med_lvglisspvel
             - Med_hvglisspvel
+
     3dmh:
         meas_list:
             Ny:
