@@ -8,8 +8,8 @@ import matplotlib.pyplot as plt
 gp_list = ['control', 'dyslexic', 'control_2']
 sp_list = [1, 2, 3, 4, 5]
 sp_list = [2]
-res_path_1 = 'Y:/dyslexia_git_pub/results/word_info/word_info_all.csv'
-res_path_2 = 'Y:/control_experiment_pub/results/word_info/word_info_all.csv'
+res_path_1 = 'D:/et_features/data/dys_study/word_info/word_info_all.csv'
+res_path_2 = 'D:/et_features/data/dys_contr_2_study/word_info/word_info_all.csv'
 var_list = ['freq_pM', 'word_length', 'fix_num', 'first_fix_dur', 'first_pass_reading_time',
             'total_reading_time', 'regr_path_reading_time', 're_reading_time',
             'regr_sacc_num']
