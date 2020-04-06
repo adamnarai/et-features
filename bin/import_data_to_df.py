@@ -105,7 +105,7 @@ for study in ['dys', 'dys_contr_2']:
     df.to_pickle(out_path + '/3dmh.pkl')
     df.to_csv(out_path + '/3dmh.csv')
     
-    # Concatenate conditions
+    # Concatenate studies
     df['study'] = study
     df_all = pd.concat((df_all, df), sort=False)
     
@@ -137,3 +137,132 @@ out_path = os.path.join(RESULTS_DIR, 'df_data', p['studies'][study]['dir'], 'wai
 os.makedirs(out_path, exist_ok=True)
 df.to_pickle(out_path + '/wais.pkl')
 df.to_csv(out_path + '/wais.csv')
+
+# %% VSP
+# Dyslexic study
+study = 'dys'
+df_all = pd.DataFrame()
+for var_type in ['ecc', 'est', 'sum']:
+    data_path = ROOT_DIR + p['studies'][study]['experiments']['vsp'][f'{var_type}_data_path']
+    subjects = p['studies'][study]['subjects']
+    groups = p['studies'][study]['groups']
+    spacing_sizes = p['studies'][study]['experiments']['vsp']['spacing_size']
+    
+    # Get data
+    df = pd.read_csv(data_path, sep=',', encoding='unicode_escape', index_col=0)
+    
+    # Rename variables
+    df = df.rename(columns={'subid': 'subj_id', 'perf_sum': 'perf', 'value': 'perf', 'eccentricity': 'param'})
+    
+    # Filter subjects
+    df = df[df['subj_id'].isin(sum([subjects[gp] for gp in list(groups.values())], []))]
+    
+    # Long to wide format
+    df = pd.pivot_table(df, values='perf', index=['group', 'spacing', 'subj_id'], columns=['param']).reset_index()
+    
+    # Concat variable types
+    if df_all.empty:
+        df_all = df
+    else:
+        df_all = df_all.merge(df, how='outer', on=['group', 'spacing', 'subj_id'])
+    
+# Save df in pkl and csv format
+out_path = os.path.join(RESULTS_DIR, 'df_data', p['studies'][study]['dir'], 'vsp')
+os.makedirs(out_path, exist_ok=True)
+df_all.to_pickle(out_path + '/vsp.pkl')
+df_all.to_csv(out_path + '/vsp.csv')
+    
+# %% Reading perf
+df_all = pd.DataFrame()
+for study in ['dys', 'dys_contr_2']:
+    data_path = ROOT_DIR + p['studies'][study]['experiments']['et']['perf_data_path']
+    subjects = p['studies'][study]['subjects']
+    groups = p['studies'][study]['groups']
+    spacing_sizes = p['studies'][study]['experiments']['et']['spacing_size']
+    
+    if study == 'dys':  # Dyslexic study
+        # Get data
+        df = pd.read_csv(data_path, sep=',', encoding='unicode_escape')
+        
+        # Rename variables
+        df = df.rename(columns={'id': 'subj_id', 'gp': 'group', 'sp': 'condition'})
+        
+        # Set condition
+        df['condition'] = 'SP' + df.condition.astype(str)
+        df['spacing_size'] = df.condition.replace(spacing_sizes)
+        
+        # Filter subjects
+        df = df[df['subj_id'].isin(sum([subjects[gp] for gp in list(groups.values())], []))]
+    elif study == 'dys_contr_2':    # Dyslexic control 2 study
+        # Get data
+        df = pd.read_csv(data_path, sep=',', encoding='unicode_escape')
+        
+        # Rename variables
+        df = df.rename(columns={'id': 'subj_id'})
+        df['group'] = 'control'
+        df['condition'] = 'SP2'
+        df['spacing_size'] = 1
+        
+        # Filter subjects
+        df = df[df['subj_id'].isin(sum([subjects[gp] for gp in list(groups.values())], []))]
+        df['subj_id'] = df['subj_id'].apply('{:06d}'.format)
+    
+    # Save df in pkl and csv format
+    out_path = os.path.join(RESULTS_DIR, 'df_data', p['studies'][study]['dir'], 'et')
+    os.makedirs(out_path, exist_ok=True)
+    df.to_pickle(out_path + '/et_perf.pkl')
+    df.to_csv(out_path + '/et_perf.csv')
+    
+    # Concatenate studies
+    df['study'] = study
+    df_all = pd.concat((df_all, df), sort=False)
+    
+# Save df_all in pkl and csv format
+out_path = os.path.join(RESULTS_DIR, 'df_data', 'all', 'et')
+os.makedirs(out_path, exist_ok=True)
+df_all.to_pickle(out_path + '/et_perf.pkl')
+df_all.to_csv(out_path + '/et_perf.csv')
+
+# %% Word info
+df_all = pd.DataFrame()
+for study in ['dys', 'dys_contr_2']:
+    data_path = ROOT_DIR + p['studies'][study]['experiments']['et']['word_info_path']
+    subjects = p['studies'][study]['subjects']
+    groups = p['studies'][study]['groups']
+    spacing_sizes = p['studies'][study]['experiments']['et']['spacing_size']
+    
+    # Get data
+    df = pd.read_csv(data_path, sep=',', encoding='unicode_escape')
+    
+    # Rename variables
+    df = df.rename(columns={'subj_code': 'subj_id', 'spacing': 'condition'})
+    
+    if study == 'dys_contr_2':    # Dyslexic control 2 study
+        df['subj_id'] = df['subj_id'].apply('{:06d}'.format)
+        df['group'] = 'control'
+    
+    # Set condition
+    df['condition'] = 'SP' + df.condition.astype(str)
+    df['spacing_size'] = df.condition.replace(spacing_sizes)
+    
+    # Filter subjects
+    df = df[df['subj_id'].isin(sum([subjects[gp] for gp in list(groups.values())], []))]
+    
+    # Get mean
+    df = df.groupby(['group', 'condition', 'subj_id']).mean()[p['params']['et']['word_info_list']]  
+    
+    # Save df in pkl and csv format
+    out_path = os.path.join(RESULTS_DIR, 'df_data', p['studies'][study]['dir'], 'et')
+    os.makedirs(out_path, exist_ok=True)
+    df.to_pickle(out_path + '/word_info.pkl')
+    df.to_csv(out_path + '/word_info.csv')
+    
+    # Concatenate studies
+    df['study'] = study
+    df_all = pd.concat((df_all, df), sort=False)
+    
+# Save df_all in pkl and csv format
+out_path = os.path.join(RESULTS_DIR, 'df_data', 'all', 'et')
+os.makedirs(out_path, exist_ok=True)
+df_all.to_pickle(out_path + '/word_info.pkl')
+df_all.to_csv(out_path + '/word_info.csv')
