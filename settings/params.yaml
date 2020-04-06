@@ -39,10 +39,20 @@ studies:
                     SP3: 1.3
                     SP4: 1.6
                     SP5: 1.9
+                perf_data_path: '/data/dys_study/perf_data.csv'
+                word_info_path: '/data/dys_study/word_info/word_info_all.csv'
             3dmh:
                 data_path: '/data/dys_study/3DMH/3dmh_data.csv'
             wais:
                 data_path: '/data/dys_study/WAIS/WAIS_data.csv'
+            vsp:
+                ecc_data_path: '/data/dys_study/VSP/vsp_ecc_data.csv'
+                est_data_path: '/data/dys_study/VSP/vsp_est_data.csv'
+                sum_data_path: '/data/dys_study/VSP/vsp_sum_data.csv'
+                spacing_size:
+                    SP1: 0.707
+                    SP2: 1
+                    SP3: 1.3
 
     dys_contr_2:
         dir: dys_contr_2_study
@@ -62,6 +72,8 @@ studies:
                 conditions: [SP2]
                 spacing_size:
                     SP2: 1
+                perf_data_path: '/data/dys_contr_2_study/perf_data.csv'
+                word_info_path: '/data/dys_contr_2_study/word_info/word_info_all.csv'
             3dmh:
                 data_path: '/data/dys_contr_2_study/3dmh/3dmh_data.csv'
                 info_path: '/data/dys_contr_2_study/3dmh/3dmh_subj_codes.csv'
@@ -189,6 +201,16 @@ params:
             - Med_glisspvel
             - Med_lvglisspvel
             - Med_hvglisspvel
+        
+        word_info_list:
+            - fix_num
+            - first_fix_dur
+            - total_reading_time
+            - first_pass_reading_time
+            - second_pass_reading_time
+            - regr_path_reading_time
+            - re_reading_time
+            - regr_sacc_num
 
     3dmh:
         meas_list:
@@ -255,4 +277,13 @@ params:
             - iq_working_mem
             - iq_proc_speed
             - iq_complet_test
+    vsp:
+        meas_list:
+            - A
+            - sigma1
+            - sigma2
+            - left_sum
+            - middle_sum
+            - right_sum
+            - all_sum
 
