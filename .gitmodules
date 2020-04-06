@@ -1,0 +1,4 @@
+[submodule "bin/external/na_matlab_tools"]
+	path = bin/external/na_matlab_tools
+	url = git@gitlab.com:naraiadam/na-matlab-tools.git
+	branch = publication
