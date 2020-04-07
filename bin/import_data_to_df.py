@@ -152,19 +152,24 @@ for var_type in ['ecc', 'est', 'sum']:
     df = pd.read_csv(data_path, sep=',', encoding='unicode_escape', index_col=0)
     
     # Rename variables
-    df = df.rename(columns={'subid': 'subj_id', 'perf_sum': 'perf', 'value': 'perf', 'eccentricity': 'param'})
+    df = df.rename(columns={'subid': 'subj_id', 'perf_sum': 'perf', 
+                            'value': 'perf', 'eccentricity': 'param',
+                            'spacing': 'spacing_size'})
+    
+    df['spacing_size'] = df['spacing_size'].round(3)
+    df['condition'] = df['spacing_size'].replace({v: k for k, v in spacing_sizes.items()})
     
     # Filter subjects
     df = df[df['subj_id'].isin(sum([subjects[gp] for gp in list(groups.values())], []))]
     
     # Long to wide format
-    df = pd.pivot_table(df, values='perf', index=['group', 'spacing', 'subj_id'], columns=['param']).reset_index()
+    df = pd.pivot_table(df, values='perf', index=['group', 'condition', 'subj_id', 'spacing_size'], columns=['param']).reset_index()
     
     # Concat variable types
     if df_all.empty:
         df_all = df
     else:
-        df_all = df_all.merge(df, how='outer', on=['group', 'spacing', 'subj_id'])
+        df_all = df_all.merge(df, how='outer', on=['group', 'condition', 'subj_id', 'spacing_size'])
     
 # Save df in pkl and csv format
 out_path = os.path.join(RESULTS_DIR, 'df_data', p['studies'][study]['dir'], 'vsp')

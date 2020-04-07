@@ -60,18 +60,18 @@ meas_list_word_info = p['params']['et']['word_info_list']
 # Merge all data
 data = data_et.merge(data_3dmh, how='outer', on=['study', 'group', 'subj_id'])
 data = data.merge(data_wais, how='outer', on=['study', 'group', 'subj_id'])
-data = data.merge(data_vsp, how='outer', on=['group', 'subj_id'])
-data = data.merge(data_perf, how='outer', on=['study', 'group', 'condition', 'subj_id'])
+data = data.merge(data_vsp, how='outer', on=['group', 'condition', 'spacing_size', 'subj_id'])
+data = data.merge(data_perf, how='outer', on=['study', 'group', 'condition', 'spacing_size', 'subj_id'])
 data = data.merge(data_word_info, how='outer', on=['study', 'group', 'condition', 'subj_id'])
 
 # Merge all measure varname
 meas_list = (
-    meas_list_et
-    + meas_list_perf
-    + meas_list_word_info 
+    meas_list_et 
+    # + meas_list_perf
     + meas_list_3dmh 
-    + meas_list_wais
-    + meas_list_vsp
+    # + meas_list_wais
+    # + meas_list_vsp
+    # + meas_list_word_info
     )
 
 # Create reports dir

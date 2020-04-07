@@ -110,7 +110,7 @@ for study in list(p['studies'].keys()):
                         cmap='RdBu_r',
                         annot=True,
                         fmt=".2f",
-                        annot_kws={"fontsize":8},
+                        annot_kws={"fontsize":6},
                         mask=mask)
             plt.title(gp + ' - ' + cond + ' - ' + study + ' - correlation (Spearman) significant (p<0.05)',
                       fontsize=18, fontweight='bold')
