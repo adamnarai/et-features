@@ -121,7 +121,7 @@ os.makedirs(results_dir, exist_ok=True)
 # 3DMH
 data_3dmh = pd.read_pickle(
     os.path.join(RESULTS_DIR, 'df_data', 'all', '3dmh', '3dmh.pkl'))
-meas_list_3dmh = p['params']['3dmh']['meas_list']['St']
+meas_list_3dmh = sum(list(p['params']['3dmh']['meas_list'].values()), [])
 
 # WAIS
 data_wais = pd.read_pickle(
@@ -156,10 +156,10 @@ data = data[(data.condition == 'SP2') | data.condition.isna()]
 # Merge all measure varname
 meas_list = (
     meas_list_3dmh 
-    + meas_list_wais
+    # + meas_list_wais
     + meas_list_perf
-    + meas_list_vsp
-    + meas_list_word_info
+    # + meas_list_vsp
+    # + meas_list_word_info
     )
 
 if save_pdf:

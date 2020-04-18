@@ -220,11 +220,8 @@ params:
                 - Ny_OlvAlszo_IRT
                 - Ny_FonTorles_P
                 - Ny_FonTorles_S
-                - Ny_RAN_betu_P
                 - Ny_RAN_betu_S
-                - Ny_RAN_szam_P
                 - Ny_RAN_szam_S
-                - Ny_RAN_kep_P
                 - Ny_RAN_kep_S
                 - Ny_SzotagTerj
                 - Ny_Corsi
@@ -279,6 +276,15 @@ params:
             - iq_complet_test
     vsp:
         meas_list:
+            - A
+            - sigma1
+            - sigma2
+            - left_sum
+            - middle_sum
+            - right_sum
+            - all_sum
+            
+        meas_list_all:
             - A
             - sigma1
             - sigma2

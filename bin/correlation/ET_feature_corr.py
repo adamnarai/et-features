@@ -62,7 +62,7 @@ for study in list(p['studies'].keys()):
         pdf = PdfPages(results_dir + '/ET_feature_corr_' + study + '.pdf')     
     
     # Correlation heatmaps
-    for gp in ['control', 'dyslexic']:#list(p['studies'][study]['groups'].values()):
+    for gp in list(p['studies'][study]['groups'].values()):
         for cond in ['SP2']:#p['studies'][study]['experiments']['et']['conditions']:
             if study == 'letter_spacing' and cond == 'SP2':
                 cond= 'NS'
