@@ -50,13 +50,15 @@ logger.addHandler(consoleHandler)
 
 # Params
 experiments = ['et']            # et, 3dmh, wais, perf, vsp, word_info
-study_list = list(p['studies'].keys())
+study_list = ['dys']#list(p['studies'].keys())
 gp_list = ['dyslexic', 'control']
 cond_list = ['SP1', 'SP2', 'SP3', 'SP4', 'SP5', 'MS', 'NS', 'DS']      # SP1, SP2, SP3, SP4, SP5, MS, NS, DS
+cond_list = ['SP1', 'SP3', 'SP4', 'SP5']
+gp_list = ['control']
 dep_var = 'Med_rspeed_wnum'
 save_pdf = True
 complex_models = True
-et_feature_list = ['meas_list_min']#'_2']#, 'meas_list_min']#, 'meas_list']
+et_feature_list = ['meas_list_min_2']#, 'meas_list_min']#, 'meas_list']
 
 # Model params
 cv_in_perm = False
@@ -96,7 +98,8 @@ def get_model_params(model, X, y, X_names, fold_num, seed):
     return params
 
 
-def run_regressions(df, X_names, y_name, fold_num, seed, l1_ratio_list, alpha_list, study, gp, cond, cv_in_perm=False, split_var=None):
+def run_regressions(df, X_names, y_name, fold_num, seed, l1_ratio_list, alpha_list, study, gp, cond, 
+                    cv_in_perm=False, binary_vars=[], split_var=None):
     logger.info('Modeling {} in study: {}, group: {}, cond: {}'.format(y_name, study, gp, cond))
     
     # Get data
@@ -113,8 +116,14 @@ def run_regressions(df, X_names, y_name, fold_num, seed, l1_ratio_list, alpha_li
     
     # Standardize data
     scaler = StandardScaler()
-    X_st = scaler.fit_transform(X)
-    X_st = pd.DataFrame(X_st, index=X.index, columns=X_names)
+    if not binary_vars:
+        X_st = scaler.fit_transform(X)
+        X_st = pd.DataFrame(X_st, index=X.index, columns=X.columns)
+    else:
+        # Leave binary variables as is and divide all others with 2 SD
+        cols_to_standard = X.columns.difference(binary_vars)
+        X_st = X.copy()
+        X_st[cols_to_standard] = scaler.fit_transform(X_st[cols_to_standard]) / 2
     
     # OLS fit fit
     logger.info('OLS fit')
@@ -266,60 +275,69 @@ for et_features, fold_num in product(et_feature_list, fold_num_list):
                 pdf.close()
         
     else:
-        # Models including spacing
-        for study, gp in product(['letter_spacing', 'dys'], gp_list):
-            cond = 'ALL'
-            if save_pdf:
-                pdf, out_path = create_pdf(study, gp, cond, et_features)
-            df = data[(data['study'] == study) & (data['group'] == gp)].loc[:, ['spacing_size'] + meas_list]
-            if df.empty:
-                continue
+        # # Models including spacing
+        # for study, gp in product(['letter_spacing', 'dys'], gp_list):
+        #     cond = 'ALL'
+        #     df = data[(data['study'] == study) & (data['group'] == gp)].loc[:, ['spacing_size'] + meas_list]
+        #     if df.empty:
+        #         continue
+        #     if save_pdf:
+        #         pdf, out_path = create_pdf(study, gp, cond, et_features)
             
-            # Run ENET and Ridge regression
-            run_regressions(df, ['spacing_size'] + X_names, y_name, fold_num, seed, 
-                            l1_ratio_list, alpha_list, study, gp, cond, cv_in_perm=cv_in_perm)
+        #     # Run ENET and Ridge regression
+        #     run_regressions(df, ['spacing_size'] + X_names, y_name, fold_num, seed, 
+        #                     l1_ratio_list, alpha_list, study, gp, cond, cv_in_perm=cv_in_perm)
             
-            if save_pdf:
-                pdf.savefig()
-                plt.close()
-                pdf.close()
+        #     if save_pdf:
+        #         pdf.savefig()
+        #         plt.savefig(out_path + '.png')
+        #         plt.close()
+        #         pdf.close()
                         
         # Models including group
         for study, cond in product(['dys'], cond_list):
             gp = 'ALL'
+            df = data[(data['study'] == study) & (data['condition'] == cond)].loc[:, ['group'] + meas_list]
             if df.empty:
                 continue
-            df = data[(data['study'] == study) & (data['condition'] == cond)].loc[:, ['group'] + meas_list]
             df['group'] = pd.get_dummies(df['group'])['dyslexic']
-            for model_type in ['standard', 'gp_diff', 'interactions']:
-                if save_pdf:
-                    pdf, out_path = create_pdf(study, gp, cond, et_features + '/' + model_type)
-                if model_type == 'standard':
-                    # Run standard regression
-                    run_regressions(df, ['group'] + X_names, y_name, fold_num, seed, 
-                                    l1_ratio_list, alpha_list, model_type + ': ' + study, gp, cond, cv_in_perm=cv_in_perm)
-                elif model_type == 'gp_diff':
-                    # TODO
-                    # # Run regression with gp diff permutation testing
-                    # run_regressions(df, ['group'] + X_names, y_name, fold_num, seed, 
-                    #                 l1_ratio_list, alpha_list, model_type + ': ' + study, gp, cond, cv_in_perm=cv_in_perm)
-                    pass
-                elif model_type == 'interactions':
-                    # Adding interaction terms with group
-                    inter_X_names = []
-                    for v in X_names:
-                        inter_name = 'group*' + v
-                        inter_X_names.append(inter_name)
-                        df[inter_name] = df['group'] * df[v]
-                        
-                    # Run regression with interactions
-                    run_regressions(df, ['group'] + X_names + inter_X_names, y_name, fold_num, seed, 
-                                    l1_ratio_list, alpha_list, '(' + model_type + ') ' + study, gp, cond, cv_in_perm=cv_in_perm)
+            for model_type in ['standard', 'interactions']:#, 'gp_diff']:
+                for binary_vars in [['group']]:#, []]:
+                    if binary_vars:
+                        binary_vars_str = '_nobinstd'
+                    else:
+                        binary_vars_str = ''
+                    if save_pdf:
+                        pdf, out_path = create_pdf(study, gp, cond, et_features + '/' + model_type + binary_vars_str)
+                    if model_type == 'standard':
+                        # Run standard regression
+                        run_regressions(df, ['group'] + X_names, y_name, fold_num, seed, 
+                                        l1_ratio_list, alpha_list, model_type + ': ' + study, gp, cond, 
+                                        cv_in_perm=cv_in_perm, binary_vars=binary_vars)
+                    elif model_type == 'gp_diff':
+                        # TODO
+                        # # Run regression with gp diff permutation testing
+                        # run_regressions(df, ['group'] + X_names, y_name, fold_num, seed, 
+                        #                 l1_ratio_list, alpha_list, model_type + ': ' + study, gp, cond, cv_in_perm=cv_in_perm)
+                        pass
+                    elif model_type == 'interactions':
+                        # Adding interaction terms with group
+                        inter_X_names = []
+                        for v in X_names:
+                            inter_name = 'group*' + v
+                            inter_X_names.append(inter_name)
+                            df[inter_name] = df['group'] * df[v]
+                            
+                        # Run regression with interactions
+                        run_regressions(df, ['group'] + X_names + inter_X_names, y_name, fold_num, seed, 
+                                        l1_ratio_list, alpha_list, '(' + model_type + ') ' + study, gp, cond, 
+                                        cv_in_perm=cv_in_perm, binary_vars=binary_vars)
                     
-            if save_pdf:
-                pdf.savefig()
-                plt.close()
-                pdf.close()
+                    if save_pdf:
+                        pdf.savefig()
+                        plt.savefig(out_path + '.png')
+                        plt.close()
+                        pdf.close()
                     
         # Models including group and spacing
         for study in ['dys']:
@@ -331,33 +349,42 @@ for et_features, fold_num in product(et_feature_list, fold_num_list):
             df['group'] = pd.get_dummies(df['group'])['dyslexic']
             
             for model_type in ['standard', 'gp_diff', 'interactions']:
-                if save_pdf:
-                    pdf, out_path = create_pdf(study, gp, cond, et_features + '/' + model_type)
-                if model_type == 'standard':
-                    # Run standard regression
-                    run_regressions(df, ['group'] + ['spacing_size'] + X_names, y_name, fold_num, seed, 
-                                    l1_ratio_list, alpha_list, model_type + ': ' + study, gp, cond, cv_in_perm=cv_in_perm)
-                elif model_type == 'gp_diff':
-                    # TODO
-                    # # Run regression with gp diff permutation testing
-                    # run_regressions(df, ['group'] + ['spacing_size'] + X_names, y_name, fold_num, seed, 
-                    #                 l1_ratio_list, alpha_list, model_type + ': ' + study, gp, cond, cv_in_perm=cv_in_perm)
-                    pass
-                elif model_type == 'interactions':
-                    # Adding interaction terms with group
-                    inter_X_names = []
-                    for v in X_names:
-                        inter_name = 'group*' + v
-                        inter_X_names.append(inter_name)
-                        df[inter_name] = df['group'] * df[v]
-                        
-                    # Run regression with interactions
-                    run_regressions(df, ['group'] + ['spacing_size'] + X_names + inter_X_names, y_name, fold_num, seed, 
-                                    l1_ratio_list, alpha_list, '(' + model_type + ') ' + study, gp, cond, cv_in_perm=cv_in_perm)
+                for binary_vars in [['group']]:#, []]:
+                    if binary_vars:
+                        binary_vars_str = '_nobinstd'
+                    else:
+                        binary_vars_str = ''
+                    if save_pdf:
+                        pdf, out_path = create_pdf(study, gp, cond, et_features + '/' + model_type + binary_vars_str)
+                    if model_type == 'standard':
+                        # Run standard regression
+                        run_regressions(df, ['group'] + ['spacing_size'] + X_names, y_name, fold_num, seed, 
+                                        l1_ratio_list, alpha_list, model_type + ': ' + study, gp, cond, 
+                                        cv_in_perm=cv_in_perm, binary_vars=binary_vars)
+                    elif model_type == 'gp_diff':
+                        # TODO
+                        # # Run regression with gp diff permutation testing
+                        # run_regressions(df, ['group'] + ['spacing_size'] + X_names, y_name, fold_num, seed, 
+                        #                 l1_ratio_list, alpha_list, model_type + ': ' + study, gp, cond, cv_in_perm=cv_in_perm)
+                        continue
+                    elif model_type == 'interactions':
+                        # Adding interaction terms with group
+                        inter_X_names = []
+                        for v in X_names:
+                            inter_name = 'group*' + v
+                            inter_X_names.append(inter_name)
+                            df[inter_name] = df['group'] * df[v]
+                            
+                        # Run regression with interactions
+                        run_regressions(df, ['group'] + ['spacing_size'] + X_names + inter_X_names, y_name, fold_num, seed, 
+                                        l1_ratio_list, alpha_list, '(' + model_type + ') ' + study, gp, cond, 
+                                        cv_in_perm=cv_in_perm, binary_vars=binary_vars)
             
-            if save_pdf:
-                pdf.savefig()
-                plt.close() 
+                    if save_pdf:
+                        pdf.savefig()
+                        plt.savefig(out_path + '.png')
+                        plt.close()
+                        pdf.close() 
     
     logger.info('Running time: {:d} min {:d} s'.format(
         round((timeit.default_timer() - start_time)//60), 

@@ -172,13 +172,13 @@ params:
             - Med_saccamp
             - Perc_fsacc
             - Perc_sacc_gliss
+            - Perc_fsacc_gliss
+            - Perc_bsacc_gliss
             - Perc_fsacc_fgliss
             - Perc_bsacc_fgliss
             - Med_fsaccamp
             - Med_bsaccamp
             - Perc_fgliss
-            - Perc_fsacc_gliss
-            - Perc_bsacc_gliss
             - Freq_fsacc
             - Freq_bsacc
             - Mean_meanfixvel
@@ -199,6 +199,56 @@ params:
             - Med_saccpvel
             - Perc_lvel_gliss
             - Med_glisspvel
+            - Med_lvglisspvel
+            - Med_hvglisspvel
+            
+        # Minimal (non-redundant) measure list
+        meas_list_min:
+            - Med_rspeed_wnum
+            - Med_fixdur
+            - Perc_fsacc
+            - Perc_fsacc_gliss
+            - Perc_bsacc_gliss
+            - Perc_fsacc_fgliss
+            - Perc_bsacc_fgliss
+            - Med_fsaccamp
+            - Med_bsaccamp
+            - Freq_fsacc
+            - Freq_bsacc
+            - Med_saccpdetth
+            - Med_fsaccdur
+            - Med_bsaccdur
+            - Med_fglissdur
+            - Med_bglissdur
+            - Med_fglissamp
+            - Med_bglissamp
+            - Med_fsnum_wnum
+            - Med_bsnum_wnum
+            - Med_saccpvel
+            - Perc_lvel_gliss
+            - Med_lvglisspvel
+            - Med_hvglisspvel
+            
+        # Minimal (non-redundant) measure list with the strongest predictors removed
+        meas_list_min_2:
+            - Med_rspeed_wnum
+            - Med_fixdur
+            - Perc_fsacc
+            - Perc_fsacc_gliss
+            - Perc_bsacc_gliss
+            - Perc_fsacc_fgliss
+            - Perc_bsacc_fgliss
+            - Med_fsaccamp
+            - Med_bsaccamp
+            - Med_saccpdetth
+            - Med_fsaccdur
+            - Med_bsaccdur
+            - Med_fglissdur
+            - Med_bglissdur
+            - Med_fglissamp
+            - Med_bglissamp
+            - Med_saccpvel
+            - Perc_lvel_gliss
             - Med_lvglisspvel
             - Med_hvglisspvel
         

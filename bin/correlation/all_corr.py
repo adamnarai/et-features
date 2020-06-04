@@ -18,13 +18,13 @@ from matplotlib.backends.backend_pdf import PdfPages
 from na_py_tools.defaults import RESULTS_DIR, SETTINGS_DIR
 
 # Params
-experiments = ['et']            # et, 3dmh, wais, perf, vsp, word_info
-conditions = ['MS', 'NS', 'DS']      # SP1, SP2, SP3, SP4, SP5, MS, NS, DS
+experiments = ['et', 'vsp']            # et, 3dmh, wais, perf, vsp, word_info
+conditions = ['SP2']      # SP1, SP2, SP3, SP4, SP5, MS, NS, DS
 dmh_type = 'Ny'                 # Ny, St, Perc (only one at a time)
-et_feature_list = 'meas_list'   # meas_list, meas_list_all
-plot_unsign = False             # As separate figure
+et_feature_list = 'meas_list_min_2'   # meas_list, meas_list_all
+plot_unsign = True             # As separate figure
 save_pdf = False
-globalplot = True
+globalplot = False
 
 # Load params YAML
 with open(SETTINGS_DIR + '/params.yaml') as file:
@@ -139,7 +139,7 @@ def onclick(event, corr_data, labels, study, gp, cond, cond_data=None, fig_regrp
 #################
 
 # Generate figures
-for study in ['letter_spacing']:#list(p['studies'].keys()):
+for study in list(p['studies'].keys()):
     print('Running study: {}'.format(study))
     if save_pdf:
         pdf = PdfPages(results_dir + '/ET_feature_corr_' + study + '.pdf')     
