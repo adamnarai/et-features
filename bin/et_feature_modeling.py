@@ -26,6 +26,7 @@ from utils import load_params, import_et_behav_data
 import logging
 from datetime import datetime
 import warnings
+from tqdm import tqdm
 
 # Load params YAML
 p = load_params()
@@ -50,20 +51,19 @@ logger.addHandler(consoleHandler)
 
 # Params
 experiments = ['et']            # et, 3dmh, wais, perf, vsp, word_info
-study_list = ['dys']#list(p['studies'].keys())
+study_list = list(p['studies'].keys())
 gp_list = ['dyslexic', 'control']
-cond_list = ['SP1', 'SP2', 'SP3', 'SP4', 'SP5', 'MS', 'NS', 'DS']      # SP1, SP2, SP3, SP4, SP5, MS, NS, DS
-cond_list = ['SP1', 'SP3', 'SP4', 'SP5']
-gp_list = ['control']
+cond_list = ['SP1', 'SP2', 'SP3', 'SP4', 'SP5', 'MS', 'NS', 'DS']   # SP1, SP2, SP3, SP4, SP5, MS, NS, DS
 dep_var = 'Med_rspeed_wnum'
 save_pdf = True
 complex_models = True
-et_feature_list = ['meas_list_min_2']#, 'meas_list_min']#, 'meas_list']
+simple_models = True
+et_feature_list = ['meas_list_min_2', 'meas_list_min']#, 'meas_list']
 
 # Model params
-cv_in_perm = False
+cv_in_perm = True
 fold_num_list = [10]
-p_perm_num = 200
+p_perm_num = 1000
 
 # ENET params
 seed = 42
@@ -99,20 +99,12 @@ def get_model_params(model, X, y, X_names, fold_num, seed):
 
 
 def run_regressions(df, X_names, y_name, fold_num, seed, l1_ratio_list, alpha_list, study, gp, cond, 
-                    cv_in_perm=False, binary_vars=[], split_var=None):
+                    cv_in_perm=False, binary_vars=[]):
     logger.info('Modeling {} in study: {}, group: {}, cond: {}'.format(y_name, study, gp, cond))
     
     # Get data
     X = df[X_names]
     y = df[y_name]
-    
-    # TODO: Create function
-    # Split groups
-    # Get coef for both
-    # Get coef diff
-    # Repeat with random group label permutations
-    if split_var:
-        pass
     
     # Standardize data
     scaler = StandardScaler()
@@ -154,7 +146,8 @@ def run_regressions(df, X_names, y_name, fold_num, seed, l1_ratio_list, alpha_li
             with warnings.catch_warnings():
                 warnings.simplefilter('ignore', ConvergenceWarning)
                 res = enet_model.fit(X_st, y_perm)
-            logger.info('Perm {:4} hyperparameters: alpha = {:.4f}  L1_ratio = {:.2f}'.format(i+1, enet_model.alpha_, enet_model.l1_ratio_))
+            logger.info('Perm {:4} hyperparameters: alpha = {:.4f}  L1_ratio = {:.2f}'
+                        .format(i+1, enet_model.alpha_, enet_model.l1_ratio_))
         perm_betas[:,i] = res.coef_
     
     # Get p values
@@ -178,7 +171,7 @@ def run_regressions(df, X_names, y_name, fold_num, seed, l1_ratio_list, alpha_li
     np.random.seed(seed)
     perm_betas = np.empty([X_st.shape[1], p_perm_num-1])
     perm_betas[:] = np.nan
-    for i in range(p_perm_num-1):
+    for i in tqdm(range(p_perm_num-1)):
         y_perm = np.random.permutation(y)
         if not cv_in_perm:
             res = ridge_model_simple.fit(X_st, y_perm)
@@ -254,7 +247,7 @@ for et_features, fold_num in product(et_feature_list, fold_num_list):
     X_names.remove(dep_var)
     y_name = dep_var
         
-    if not complex_models:
+    if simple_models:
         # Modeling each study/group/condition
         for study, gp, cond in product(study_list, gp_list, cond_list):
             df = data[(data['study'] == study) & (data['condition'] == cond) 
@@ -274,25 +267,25 @@ for et_features, fold_num in product(et_feature_list, fold_num_list):
                 plt.close()
                 pdf.close()
         
-    else:
-        # # Models including spacing
-        # for study, gp in product(['letter_spacing', 'dys'], gp_list):
-        #     cond = 'ALL'
-        #     df = data[(data['study'] == study) & (data['group'] == gp)].loc[:, ['spacing_size'] + meas_list]
-        #     if df.empty:
-        #         continue
-        #     if save_pdf:
-        #         pdf, out_path = create_pdf(study, gp, cond, et_features)
+    if complex_models:
+        # Models including spacing
+        for study, gp in product(['letter_spacing', 'dys'], gp_list):
+            cond = 'ALL'
+            df = data[(data['study'] == study) & (data['group'] == gp)].loc[:, ['spacing_size'] + meas_list]
+            if df.empty:
+                continue
+            if save_pdf:
+                pdf, out_path = create_pdf(study, gp, cond, et_features)
             
-        #     # Run ENET and Ridge regression
-        #     run_regressions(df, ['spacing_size'] + X_names, y_name, fold_num, seed, 
-        #                     l1_ratio_list, alpha_list, study, gp, cond, cv_in_perm=cv_in_perm)
+            # Run ENET and Ridge regression
+            run_regressions(df, ['spacing_size'] + X_names, y_name, fold_num, seed, 
+                            l1_ratio_list, alpha_list, study, gp, cond, cv_in_perm=cv_in_perm)
             
-        #     if save_pdf:
-        #         pdf.savefig()
-        #         plt.savefig(out_path + '.png')
-        #         plt.close()
-        #         pdf.close()
+            if save_pdf:
+                pdf.savefig()
+                plt.savefig(out_path + '.png')
+                plt.close()
+                pdf.close()
                         
         # Models including group
         for study, cond in product(['dys'], cond_list):
@@ -301,8 +294,8 @@ for et_features, fold_num in product(et_feature_list, fold_num_list):
             if df.empty:
                 continue
             df['group'] = pd.get_dummies(df['group'])['dyslexic']
-            for model_type in ['standard', 'interactions']:#, 'gp_diff']:
-                for binary_vars in [['group']]:#, []]:
+            for model_type in ['standard', 'interactions']:
+                for binary_vars in [['group']], []]:
                     if binary_vars:
                         binary_vars_str = '_nobinstd'
                     else:
@@ -314,12 +307,6 @@ for et_features, fold_num in product(et_feature_list, fold_num_list):
                         run_regressions(df, ['group'] + X_names, y_name, fold_num, seed, 
                                         l1_ratio_list, alpha_list, model_type + ': ' + study, gp, cond, 
                                         cv_in_perm=cv_in_perm, binary_vars=binary_vars)
-                    elif model_type == 'gp_diff':
-                        # TODO
-                        # # Run regression with gp diff permutation testing
-                        # run_regressions(df, ['group'] + X_names, y_name, fold_num, seed, 
-                        #                 l1_ratio_list, alpha_list, model_type + ': ' + study, gp, cond, cv_in_perm=cv_in_perm)
-                        pass
                     elif model_type == 'interactions':
                         # Adding interaction terms with group
                         inter_X_names = []
@@ -349,7 +336,7 @@ for et_features, fold_num in product(et_feature_list, fold_num_list):
             df['group'] = pd.get_dummies(df['group'])['dyslexic']
             
             for model_type in ['standard', 'gp_diff', 'interactions']:
-                for binary_vars in [['group']]:#, []]:
+                for binary_vars in [['group']], []]:
                     if binary_vars:
                         binary_vars_str = '_nobinstd'
                     else:
@@ -361,12 +348,6 @@ for et_features, fold_num in product(et_feature_list, fold_num_list):
                         run_regressions(df, ['group'] + ['spacing_size'] + X_names, y_name, fold_num, seed, 
                                         l1_ratio_list, alpha_list, model_type + ': ' + study, gp, cond, 
                                         cv_in_perm=cv_in_perm, binary_vars=binary_vars)
-                    elif model_type == 'gp_diff':
-                        # TODO
-                        # # Run regression with gp diff permutation testing
-                        # run_regressions(df, ['group'] + ['spacing_size'] + X_names, y_name, fold_num, seed, 
-                        #                 l1_ratio_list, alpha_list, model_type + ': ' + study, gp, cond, cv_in_perm=cv_in_perm)
-                        continue
                     elif model_type == 'interactions':
                         # Adding interaction terms with group
                         inter_X_names = []
