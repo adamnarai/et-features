@@ -61,7 +61,7 @@ simple_models = True
 et_feature_list = ['meas_list_min_2', 'meas_list_min']#, 'meas_list']
 
 # Model params
-cv_in_perm = True
+cv_in_perm = False
 fold_num_list = [10]
 p_perm_num = 1000
 
@@ -295,7 +295,7 @@ for et_features, fold_num in product(et_feature_list, fold_num_list):
                 continue
             df['group'] = pd.get_dummies(df['group'])['dyslexic']
             for model_type in ['standard', 'interactions']:
-                for binary_vars in [['group']], []]:
+                for binary_vars in [['group'], []]:
                     if binary_vars:
                         binary_vars_str = '_nobinstd'
                     else:
@@ -336,7 +336,7 @@ for et_features, fold_num in product(et_feature_list, fold_num_list):
             df['group'] = pd.get_dummies(df['group'])['dyslexic']
             
             for model_type in ['standard', 'gp_diff', 'interactions']:
-                for binary_vars in [['group']], []]:
+                for binary_vars in [['group'], []]:
                     if binary_vars:
                         binary_vars_str = '_nobinstd'
                     else:
