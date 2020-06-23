@@ -271,3 +271,37 @@ out_path = os.path.join(RESULTS_DIR, 'df_data', 'all', 'et')
 os.makedirs(out_path, exist_ok=True)
 df_all.to_pickle(out_path + '/word_info.pkl')
 df_all.to_csv(out_path + '/word_info.csv')
+
+# %% EEG
+df_all = pd.DataFrame()
+for study in ['dys', 'dys_contr_2']:
+    data_path = ROOT_DIR + p['studies'][study]['experiments']['eeg']['data_path']
+    subjects = p['studies'][study]['subjects']
+    groups = p['studies'][study]['groups']
+    
+    # Get data
+    df = pd.read_csv(data_path, sep=',', encoding='unicode_escape')
+    df['condition'] = 'SP2'
+    
+    if study == 'dys_contr_2':
+        df['subj_id'] = df['subj_id'].apply('{:06d}'.format)
+        df['group'] = 'control'
+    
+    # Filter subjects
+    df = df[df['subj_id'].isin(sum([subjects[gp] for gp in list(groups.values())], []))]
+    
+    # Save df in pkl and csv format
+    out_path = os.path.join(RESULTS_DIR, 'df_data', p['studies'][study]['dir'], 'eeg')
+    os.makedirs(out_path, exist_ok=True)
+    df.to_pickle(out_path + '/eeg_peak_data.pkl')
+    df.to_csv(out_path + '/eeg_peak_data.csv')
+    
+    # Concatenate studies
+    df['study'] = study
+    df_all = pd.concat((df_all, df), sort=False)
+    
+# Save df_all in pkl and csv format
+out_path = os.path.join(RESULTS_DIR, 'df_data', 'all', 'eeg')
+os.makedirs(out_path, exist_ok=True)
+df_all.to_pickle(out_path + '/eeg_peak_data.pkl')
+df_all.to_csv(out_path + '/eeg_peak_data.csv')
