@@ -18,25 +18,39 @@ from matplotlib.backends.backend_pdf import PdfPages
 from na_py_tools.defaults import RESULTS_DIR, SETTINGS_DIR
 
 # Params
-experiments = ['et', 'vsp']            # et, 3dmh, wais, perf, vsp, word_info
+experiments = ['et', 'vsp']            # et, 3dmh, wais, perf, vsp, word_info, eeg
 conditions = ['SP2']      # SP1, SP2, SP3, SP4, SP5, MS, NS, DS
 dmh_type = 'Ny'                 # Ny, St, Perc (only one at a time)
-et_feature_list = 'meas_list_min_2'   # meas_list, meas_list_all
+et_feature_list = 'meas_list'   # meas_list, meas_list_all
 plot_unsign = True             # As separate figure
 save_pdf = False
 globalplot = False
+
+only_NS_et = False
+only_NS_vsp = False
+prefix = ''
+if only_NS_et:
+    prefix += '!!! only NS ET '
+if only_NS_vsp:
+    prefix += '!!! only NS VSP '
 
 # Load params YAML
 with open(SETTINGS_DIR + '/params.yaml') as file:
     p = yaml.full_load(file)
 
 # Read data
-    meas_list = dict()
+meas_list = dict()
 # ET
 data_et = pd.read_pickle(
     os.path.join(RESULTS_DIR, 'df_data', 'all', 'et', 'et_features.pkl'))
 meas_list['et'] = p['params']['et'][et_feature_list]
-
+if only_NS_et:
+    for sp in [1, 3, 4, 5]:
+        data_et.loc[(data_et['condition'] == f'SP{sp}') & (data_et['study'] == 'dys'), 
+                    (data_et.columns != 'condition') & (data_et.columns != 'spacing_size')] = \
+            data_et.loc[(data_et['condition'] == 'SP2') & (data_et['study'] == 'dys'),
+                        (data_et.columns != 'condition') & (data_et.columns != 'spacing_size')].values
+        
 # 3DMH
 data_3dmh = pd.read_pickle(
     os.path.join(RESULTS_DIR, 'df_data', 'all', '3dmh', '3dmh.pkl'))
@@ -53,6 +67,12 @@ data_vsp = pd.read_pickle(
     os.path.join(RESULTS_DIR, 'df_data', 'dys_study', 'vsp', 'vsp.pkl'))
 data_vsp.columns = data_vsp.columns.astype(str)
 meas_list['vsp'] = p['params']['vsp']['meas_list_all']
+if only_NS_vsp:
+    for sp in [1, 3]:
+        data_vsp.loc[data_vsp['condition'] == f'SP{sp}', 
+                     (data_vsp.columns != 'condition') & (data_vsp.columns != 'spacing_size')] = \
+            data_vsp.loc[data_vsp['condition'] == 'SP2', 
+                         (data_vsp.columns != 'condition') & (data_vsp.columns != 'spacing_size')].values
 
 # Reading perf
 data_perf = pd.read_pickle(
@@ -64,12 +84,18 @@ data_word_info = pd.read_pickle(
     os.path.join(RESULTS_DIR, 'df_data', 'all', 'et', 'word_info.pkl'))
 meas_list['word_info'] = p['params']['et']['word_info_list']
 
+# EEG
+data_eeg = pd.read_pickle(
+    os.path.join(RESULTS_DIR, 'df_data', 'all', 'eeg', 'eeg_peak_data.pkl'))
+meas_list['eeg'] = p['params']['eeg']['meas_list']
+
 # Merge all data
 data = data_et.merge(data_3dmh, how='outer', on=['study', 'group', 'subj_id'])
 data = data.merge(data_wais, how='outer', on=['study', 'group', 'subj_id'])
 data = data.merge(data_vsp, how='outer', on=['group', 'condition', 'spacing_size', 'subj_id'])
 data = data.merge(data_perf, how='outer', on=['study', 'group', 'condition', 'spacing_size', 'subj_id'])
 data = data.merge(data_word_info, how='outer', on=['study', 'group', 'condition', 'subj_id'])
+data = data.merge(data_eeg, how='outer', on=['study', 'group', 'condition', 'subj_id'])
 
 # Merge all measure varname
 plot_meas_list = sum([meas_list[exp] for exp in experiments], [])
@@ -123,7 +149,8 @@ def onclick(event, corr_data, labels, study, gp, cond, cond_data=None, fig_regrp
         varname_x = corr_data.columns[x]
         varname_y = corr_data.columns[y]
         d = dict()
-        cond_list = cond_data['condition'].unique()
+        cond_list = cond_data.loc[cond_data[[varname_x, varname_y]].notna().all(axis=1), 'condition'].unique()
+        print(cond_list)
         for cond in cond_list:
             curr_cond_data = cond_data[cond_data['condition'] == cond]
             stats = pg.corr(curr_cond_data[varname_x], curr_cond_data[varname_y], method='skipped')
@@ -186,7 +213,7 @@ for study in list(p['studies'].keys()):
                             fmt=".2f",
                             annot_kws={"fontsize":8},
                             mask=mask)
-                plt.title(gp + ' - ' + cond + ' - ' + study + ' - correlation (Spearman) significant (p<0.05)',
+                plt.title(prefix + gp + ' - ' + cond + ' - ' + study + ' - correlation (Spearman) significant (p<0.05)',
                           fontsize=18, fontweight='bold')
                 plt.subplots_adjust(left=0.2, right=0.9, top=0.9, bottom=0.2)
                 if save_pdf:
