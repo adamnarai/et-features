@@ -5,3 +5,6 @@ log
 *.mat
 *.asv
 *.log
+*.RData
+*.pdf
+*.pyc
