@@ -1,0 +1,39 @@
+# Paths
+data_path: 'data.csv'
+stats_dir: './stats'
+reports_dir: './reports'
+
+# Measures selected for analyses
+meas_list:
+    - dprime_exp1
+    
+# Post-hoc contrasts
+ph_contrasts:
+    - dyslexic.SP1 - control.SP1 = 0
+    - dyslexic.SP2 - control.SP2 = 0
+    - dyslexic.SP3 - control.SP3 = 0
+    - dyslexic.SP4 - control.SP4 = 0
+    - dyslexic.SP5 - control.SP5 = 0
+                               
+    - dyslexic.SP1 - dyslexic.SP2 = 0
+    - dyslexic.SP1 - dyslexic.SP3 = 0
+    - dyslexic.SP1 - dyslexic.SP4 = 0
+    - dyslexic.SP1 - dyslexic.SP5 = 0
+    - dyslexic.SP2 - dyslexic.SP3 = 0
+    - dyslexic.SP2 - dyslexic.SP4 = 0
+    - dyslexic.SP2 - dyslexic.SP5 = 0
+    - dyslexic.SP3 - dyslexic.SP4 = 0
+    - dyslexic.SP3 - dyslexic.SP5 = 0
+    - dyslexic.SP4 - dyslexic.SP5 = 0
+                               
+    - control.SP1 - control.SP2 = 0
+    - control.SP1 - control.SP3 = 0
+    - control.SP1 - control.SP4 = 0
+    - control.SP1 - control.SP5 = 0
+    - control.SP2 - control.SP3 = 0
+    - control.SP2 - control.SP4 = 0
+    - control.SP2 - control.SP5 = 0
+    - control.SP3 - control.SP4 = 0
+    - control.SP3 - control.SP5 = 0
+    - control.SP4 - control.SP5 = 0
+
