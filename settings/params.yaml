@@ -53,6 +53,8 @@ studies:
                     SP1: 0.707
                     SP2: 1
                     SP3: 1.3
+            eeg:
+                data_path: '/data/dys_study/EEG/eeg_peak_data.csv'
 
     dys_contr_2:
         dir: dys_contr_2_study
@@ -77,6 +79,8 @@ studies:
             3dmh:
                 data_path: '/data/dys_contr_2_study/3dmh/3dmh_data.csv'
                 info_path: '/data/dys_contr_2_study/3dmh/3dmh_subj_codes.csv'
+            eeg:
+                data_path: '/data/dys_contr_2_study/EEG/eeg_peak_data.csv'
                 
 params:
     et:
@@ -335,6 +339,13 @@ params:
             - all_sum
             
         meas_list_all:
+            - '-6'
+            - '-4'
+            - '-2'
+            - '0'
+            - '2'
+            - '4'
+            - '6'
             - A
             - sigma1
             - sigma2
@@ -342,4 +353,37 @@ params:
             - middle_sum
             - right_sum
             - all_sum
+    eeg:
+        meas_list:
+            - range_li_2
+            - left_latency_2
+            - right_latency_2
+            - first_peak_li_2
+            - range_left_amp_2
+            - range_right_amp_2
+            - left_amp_2
+            - right_amp_2
+            - range_li_3
+            - left_latency_3
+            - right_latency_3
+            - first_peak_li_3
+            - range_left_amp_3
+            - range_right_amp_3
+            - left_amp_3
+            - right_amp_3
+            - left_latency_fix
+            - right_latency_fix
+            - left_amp_fix
+            - right_amp_fix
+            - left_li_fix
+            - right_li_fix
+            - first_peak_li_fix
+            - left_latency_nat
+            - right_latency_nat
+            - left_amp_nat
+            - right_amp_nat
+            - left_li_nat
+            - right_li_nat
+            - first_peak_li_nat
+
 
