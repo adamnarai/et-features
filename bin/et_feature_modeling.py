@@ -71,6 +71,7 @@ l1_ratio_N = 20
 l1_ratio_min_exp = -2
 enet_alpha_N = 20
 l1_ratio_list = (1 + 10**l1_ratio_min_exp) - np.logspace(0, l1_ratio_min_exp, l1_ratio_N)
+enet_max_iter = 10000
 
 # Ridge params
 ridge_alpha_N = 20
@@ -126,13 +127,13 @@ def run_regressions(df, X_names, y_name, fold_num, seed, l1_ratio_list, alpha_li
     # ENET hyperparameter (alpha, L1_ratio) selection and fit in one step
     logger.info('ENET hyperparameter selection using {}-fold cross-validation...'.format(fold_num))
     enet_model = ElasticNetCV(cv=fold_num, random_state=seed, l1_ratio=l1_ratio_list, 
-                              n_alphas=enet_alpha_N, max_iter=5000, n_jobs=6)
+                              n_alphas=enet_alpha_N, max_iter=enet_max_iter, n_jobs=6)
     enet_params = get_model_params(enet_model.fit(X_st, y), X_st, y, X_names, fold_num, seed)
     logger.info('Best hyperparameters: alpha = {:.4f}  L1_ratio = {:.2f}'.format(enet_model.alpha_, enet_model.l1_ratio_))
     
     # ENET permuted p values
     logger.info('ENET p calculation using {} permutations...'.format(p_perm_num))
-    enet_model_simple = ElasticNet(alpha=enet_model.alpha_, l1_ratio=enet_model.l1_ratio_, max_iter=5000)
+    enet_model_simple = ElasticNet(alpha=enet_model.alpha_, l1_ratio=enet_model.l1_ratio_, max_iter=enet_max_iter)
     
     # Permutations
     np.random.seed(seed)
@@ -335,7 +336,7 @@ for et_features, fold_num in product(et_feature_list, fold_num_list):
                 continue
             df['group'] = pd.get_dummies(df['group'])['dyslexic']
             
-            for model_type in ['standard', 'gp_diff', 'interactions']:
+            for model_type in ['standard', 'interactions']:
                 for binary_vars in [['group'], []]:
                     if binary_vars:
                         binary_vars_str = '_nobinstd'
