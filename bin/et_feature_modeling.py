@@ -106,6 +106,10 @@ def run_regressions(df, X_names, y_name, fold_num, seed, l1_ratio_list, alpha_li
     
     # Dict of all modeling data
     model_data = dict()
+    model_data['ols'] = dict()
+    model_data['enet'] = dict()
+    model_data['ridge'] = dict()
+    model_data['vif'] = dict()
     
     # Get data
     X = df[X_names]
