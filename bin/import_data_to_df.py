@@ -305,3 +305,46 @@ out_path = os.path.join(RESULTS_DIR, 'df_data', 'all', 'eeg')
 os.makedirs(out_path, exist_ok=True)
 df_all.to_pickle(out_path + '/eeg_peak_data.pkl')
 df_all.to_csv(out_path + '/eeg_peak_data.csv')
+    
+# %% Proofreading (ET features)
+study = 'dys'
+subjects = p['studies'][study]['subjects']
+groups = p['studies'][study]['groups']
+data_path = ROOT_DIR + p['studies'][study]['experiments']['proofreading']['data_path']
+
+# Get data
+df = pd.read_csv(data_path, index_col='subject').reset_index().rename(columns={'subject':'subj_id', 'label':'group'})
+df.columns = [str(col) + '_proof' if col not in {'study', 'group','subj_id'} else col for col in df.columns]
+df['group'].replace({1:'dyslexic', 2:'control'}, inplace=True)
+df['study'] = study
+
+# Filter subjects
+df = df[df['subj_id'].isin(sum([subjects[gp] for gp in list(groups.values())], []))]
+  
+# Save df in pkl and csv format
+out_path = os.path.join(RESULTS_DIR, 'df_data', p['studies'][study]['dir'], 'proofreading')
+os.makedirs(out_path, exist_ok=True)
+df.to_pickle(out_path + '/proofreading.pkl')
+df.to_csv(out_path + '/proofreading.csv')
+
+# %% Sentence verification (ET features)
+study = 'dys'
+subjects = p['studies'][study]['subjects']
+groups = p['studies'][study]['groups']
+data_path = ROOT_DIR + p['studies'][study]['experiments']['sentence_verification']['data_path']
+
+# Get data
+df = pd.read_csv(data_path, index_col='subject').reset_index().rename(columns={'subject':'subj_id', 'label':'group'})
+df.columns = [str(col) + '_verif' if col not in {'study', 'group','subj_id'} else col for col in df.columns]
+df['group'].replace({1:'dyslexic', 2:'control'}, inplace=True)
+df['study'] = study
+
+# Filter subjects
+df = df[df['subj_id'].isin(sum([subjects[gp] for gp in list(groups.values())], []))]
+
+  
+# Save df in pkl and csv format
+out_path = os.path.join(RESULTS_DIR, 'df_data', p['studies'][study]['dir'], 'sentence_verification')
+os.makedirs(out_path, exist_ok=True)
+df.to_pickle(out_path + '/sentence_verification.pkl')
+df.to_csv(out_path + '/sentence_verification.csv')
