@@ -18,13 +18,14 @@ from matplotlib.backends.backend_pdf import PdfPages
 from na_py_tools.defaults import RESULTS_DIR, SETTINGS_DIR
 
 # Params
-experiments = ['et', 'vsp']            # et, 3dmh, wais, perf, vsp, word_info, eeg
-conditions = ['SP2']      # SP1, SP2, SP3, SP4, SP5, MS, NS, DS
+experiments = ['et'] # et, 3dmh, wais, perf, vsp, word_info, eeg, proofreading, sentence_verification
+conditions = ['SP2']            # SP1, SP2, SP3, SP4, SP5, MS, NS, DS
 dmh_type = 'Ny'                 # Ny, St, Perc (only one at a time)
 et_feature_list = 'meas_list'   # meas_list, meas_list_all
-plot_unsign = True             # As separate figure
+plot_unsign = False             # As separate figure
 save_pdf = False
 globalplot = False
+corr_method = 'skipped'     # skipped, spearman, pearson
 
 only_NS_et = False
 only_NS_vsp = False
@@ -89,6 +90,16 @@ data_eeg = pd.read_pickle(
     os.path.join(RESULTS_DIR, 'df_data', 'all', 'eeg', 'eeg_peak_data.pkl'))
 meas_list['eeg'] = p['params']['eeg']['meas_list']
 
+# Proofreading (ET features)
+data_proofreading = pd.read_pickle(
+    os.path.join(RESULTS_DIR, 'df_data', 'dys_study', 'proofreading', 'proofreading.pkl'))
+meas_list['proofreading'] = p['params']['proofreading']['meas_list']
+
+# Sentence verification (ET features)
+data_sentence_verification = pd.read_pickle(
+    os.path.join(RESULTS_DIR, 'df_data', 'dys_study', 'sentence_verification', 'sentence_verification.pkl'))
+meas_list['sentence_verification'] = p['params']['sentence_verification']['meas_list']
+
 # Merge all data
 data = data_et.merge(data_3dmh, how='outer', on=['study', 'group', 'subj_id'])
 data = data.merge(data_wais, how='outer', on=['study', 'group', 'subj_id'])
@@ -96,6 +107,8 @@ data = data.merge(data_vsp, how='outer', on=['group', 'condition', 'spacing_size
 data = data.merge(data_perf, how='outer', on=['study', 'group', 'condition', 'spacing_size', 'subj_id'])
 data = data.merge(data_word_info, how='outer', on=['study', 'group', 'condition', 'subj_id'])
 data = data.merge(data_eeg, how='outer', on=['study', 'group', 'condition', 'subj_id'])
+data = data.merge(data_proofreading, how='outer', on=['study', 'group', 'subj_id'], suffixes=('','_proof'))
+data = data.merge(data_sentence_verification, how='outer', on=['study', 'group', 'subj_id'], suffixes=('','_verif'))
 
 # Merge all measure varname
 plot_meas_list = sum([meas_list[exp] for exp in experiments], [])
@@ -172,20 +185,30 @@ for study in list(p['studies'].keys()):
         pdf = PdfPages(results_dir + '/ET_feature_corr_' + study + '.pdf')     
     
     # Correlation heatmaps
-    for gp in list(p['studies'][study]['groups'].values()):
+    gp_list = list(p['studies'][study]['groups'].values())
+    if len(gp_list) > 1:
+        gp_list += ['all_gp']
+    for gp in gp_list:
         for cond in conditions:
-            corr_data = data[(data['study'] == study) & (data['condition'] == cond) 
-                             & (data['group'] == gp)].loc[:, plot_meas_list]
-            labels = data[(data['study'] == study) & (data['condition'] == cond) 
-                             & (data['group'] == gp)].subj_id
+            if gp == 'all_gp':
+                corr_data = data[(data['study'] == study) & (data['condition'] == cond)].loc[:, plot_meas_list]
+                labels = data[(data['study'] == study) & (data['condition'] == cond)].subj_id
+            else:
+                corr_data = data[(data['study'] == study) & (data['condition'] == cond) 
+                                 & (data['group'] == gp)].loc[:, plot_meas_list]
+                labels = data[(data['study'] == study) & (data['condition'] == cond) 
+                                 & (data['group'] == gp)].subj_id
             corr_data = corr_data.dropna(axis='columns', how='all')
             if corr_data.empty:
                 continue
             print('Running corr heatmap group: {}, cond: {}'.format(gp, cond))
             
             # Spearman correlation (p values in upper triangle)
-            r = corr_data.rcorr(method='spearman', stars=False, decimals=4)
-            r = r.replace('-', 1).apply(lambda x: pd.to_numeric(x, errors='coerce'))
+            # r = corr_data.rcorr(method='spearman', stars=False, decimals=4)
+            # r = r.replace('-', 1).apply(lambda x: pd.to_numeric(x, errors='coerce'))
+            # pval = r.T
+            r = corr_data.corr(method=lambda x, y: pg.corr(x, y, method=corr_method)['r'])
+            pval = corr_data.corr(method=lambda x, y: pg.corr(x, y, method=corr_method)['p-val'])
             
             # Triangle mask
             mask = np.zeros_like(r, dtype=np.bool)
@@ -194,13 +217,16 @@ for study in list(p['studies'].keys()):
             # All r value
             for sign in [False, True]:
                 if sign:
-                    mask[(r.T >= .05)] = True
+                    mask[(pval >= .05)] = True
                 elif not plot_unsign:
                     continue
 
                 # Correlation plot
                 fig = plt.figure(figsize=(18, 14))
-                cond_data = data[(data['study'] == study) & (data['group'] == gp)]
+                if gp == 'all_gp':
+                    cond_data = data[data['study'] == study]
+                else:
+                    cond_data = data[(data['study'] == study) & (data['group'] == gp)]
                 curr_func = partial(onclick, corr_data=corr_data, labels=labels, 
                                     study=study, gp=gp, cond=cond, cond_data=cond_data,
                                     fig_regrplot=fig_regrplot, fig_compare=fig_compare)
@@ -221,3 +247,107 @@ for study in list(p['studies'].keys()):
                     plt.close()
     if save_pdf:
         pdf.close()
+        
+# %% Spec figures
+# Between spacings
+study = 'dys'
+# Correlation heatmaps
+gp_list = list(p['studies'][study]['groups'].values())
+
+for gp in gp_list:
+    corr_data = data[(data['study'] == study) & (data['group'] == gp)].loc[:, plot_meas_list + ['condition', 'subj_id']]
+    corr_data = corr_data.dropna(axis='columns', how='all')
+    if corr_data.empty:
+        continue
+
+    corr_data = corr_data.pivot(index='subj_id', columns='condition', values='Med_rspeed_wnum')    
+    labels = corr_data.index
+    
+    # Spearman correlation (p values in upper triangle)
+    r = corr_data.rcorr(method='spearman', stars=False, decimals=4)
+    r = r.replace('-', 1).apply(lambda x: pd.to_numeric(x, errors='coerce'))
+    
+    # Triangle mask
+    mask = np.zeros_like(r, dtype=np.bool)
+    mask[np.triu_indices_from(mask)] = True
+    
+    # All r value
+    for sign in [False, True]:
+        if sign:
+            mask[(r.T >= .05)] = True
+        elif not plot_unsign:
+            continue
+
+        # Correlation plot
+        fig = plt.figure(figsize=(18, 14))
+        cond_data = data[(data['study'] == study) & (data['group'] == gp)]
+        curr_func = partial(onclick, corr_data=corr_data, labels=labels, 
+                            study=study, gp=gp, cond=cond, cond_data=cond_data,
+                            fig_regrplot=fig_regrplot, fig_compare=fig_compare)
+        fig.canvas.mpl_connect('button_press_event', curr_func)
+        sns.heatmap(r,
+                    vmin=-1,
+                    vmax=1,
+                    cmap='RdBu_r',
+                    annot=True,
+                    fmt=".2f",
+                    annot_kws={"fontsize":8},
+                    mask=mask)
+        plt.title(prefix + gp + ' - ' + cond + ' - ' + study + ' - correlation (Spearman) significant (p<0.05)',
+                  fontsize=18, fontweight='bold')
+        plt.subplots_adjust(left=0.2, right=0.9, top=0.9, bottom=0.2)
+        
+        
+# Between SP2-5 perf, rspeed and EEG
+study = 'dys'
+# Correlation heatmaps
+gp_list = list(p['studies'][study]['groups'].values())
+
+for gp in gp_list:
+    corr_data = data[(data['study'] == study) & (data['group'] == gp)].loc[:, meas_list['eeg'] + 
+                                                                           ['perf', 'Med_rspeed_wnum', 'condition', 'subj_id']]
+    corr_data = corr_data.dropna(axis='columns', how='all')
+
+    rspeed_data = corr_data.pivot(index='subj_id', columns='condition', values='Med_rspeed_wnum')
+    perf_data = corr_data.pivot(index='subj_id', columns='condition', values='perf')
+    corr_data = corr_data[corr_data['condition'] == 'SP2']
+    corr_data.set_index('subj_id', inplace=True)
+    corr_data['rspeed_SP5-2'] = rspeed_data['SP5'] - rspeed_data['SP2']
+    corr_data['perf_SP5-2'] = perf_data['SP5'] - perf_data['SP2']
+    labels = corr_data.index
+    corr_data = corr_data.drop(labels=['condition'], axis=1)
+    
+    # Spearman correlation (p values in upper triangle)
+    r = corr_data.rcorr(method='spearman', stars=False, decimals=4)
+    r = r.replace('-', 1).apply(lambda x: pd.to_numeric(x, errors='coerce'))
+    
+    # Triangle mask
+    mask = np.zeros_like(r, dtype=np.bool)
+    mask[np.triu_indices_from(mask)] = True
+    
+    # All r value
+    for sign in [False, True]:
+        if sign:
+            mask[(r.T >= .05)] = True
+        elif not plot_unsign:
+            continue
+
+        # Correlation plot
+        fig = plt.figure(figsize=(18, 14))
+        cond_data = data[(data['study'] == study) & (data['group'] == gp)]
+        curr_func = partial(onclick, corr_data=corr_data, labels=labels, 
+                            study=study, gp=gp, cond=cond, cond_data=cond_data,
+                            fig_regrplot=fig_regrplot, fig_compare=fig_compare)
+        fig.canvas.mpl_connect('button_press_event', curr_func)
+        sns.heatmap(r,
+                    vmin=-1,
+                    vmax=1,
+                    cmap='RdBu_r',
+                    annot=True,
+                    fmt=".2f",
+                    annot_kws={"fontsize":8},
+                    mask=mask)
+        plt.title(prefix + gp + ' - ' + cond + ' - ' + study + ' - correlation (Spearman) significant (p<0.05)',
+                  fontsize=18, fontweight='bold')
+        plt.subplots_adjust(left=0.2, right=0.9, top=0.9, bottom=0.2)
+

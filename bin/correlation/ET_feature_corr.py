@@ -20,6 +20,7 @@ from na_py_tools.defaults import RESULTS_DIR, SETTINGS_DIR
 # Params
 save_pdf = False
 plot_unsign = False
+corr_method = 'skipped'     # skipped, spearman, pearson
 
 # Load params YAML
 with open(SETTINGS_DIR + '/params.yaml') as file:
@@ -75,8 +76,11 @@ for study in list(p['studies'].keys()):
             print('Running corr heatmap group: {}, cond: {}'.format(gp, cond))
             
             # Spearman correlation (p values in upper triangle)
-            r = corr_data.rcorr(method='spearman', stars=False, decimals=4)
-            r = r.replace('-', 1).apply(pd.to_numeric)
+            # r = corr_data.rcorr(method='spearman', stars=False, decimals=4)
+            # r = r.replace('-', 1).apply(pd.to_numeric)
+            # pval = r.T
+            r = corr_data.corr(method=lambda x, y: pg.corr(x, y, method=corr_method)['r'])
+            pval = corr_data.corr(method=lambda x, y: pg.corr(x, y, method=corr_method)['p-val'])
             
             # Triangle mask
             mask = np.zeros_like(r, dtype=np.bool)
@@ -100,7 +104,7 @@ for study in list(p['studies'].keys()):
                     plt.close()
             
             # Significant r values
-            mask[(r.T >= .05)] = True
+            mask[(pval >= .05)] = True
             fig = plt.figure(figsize=(18, 14))            
             curr_func = partial(onclick, corr_data=corr_data, labels=labels, study=study, gp=gp, cond=cond)
             fig.canvas.mpl_connect('button_press_event', curr_func)
