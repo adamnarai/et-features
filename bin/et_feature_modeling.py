@@ -153,9 +153,9 @@ def run_regressions(df, X_names, y_name, fold_num, seed, l1_ratio_list, alpha_li
     # Permutations
     np.random.seed(seed)
     model_data['enet']['seed'] = seed
-    perm_betas = np.empty([X_st.shape[1], p_perm_num-1])
+    perm_betas = np.empty([X_st.shape[1], p_perm_num])
     perm_betas[:] = np.nan
-    for i in range(p_perm_num-1):
+    for i in range(p_perm_num):
         y_perm = np.random.permutation(y)
         if not cv_in_perm:
             res = enet_model_simple.fit(X_st, y_perm)
@@ -172,7 +172,7 @@ def run_regressions(df, X_names, y_name, fold_num, seed, l1_ratio_list, alpha_li
     # Get p values
     ge = np.sum(perm_betas <= enet_params['raw_coef'][:, None], axis=1)
     le = np.sum(perm_betas >= enet_params['raw_coef'][:, None], axis=1)
-    enet_p = np.minimum((2*np.minimum(ge,le)+1)/p_perm_num, np.ones(ge.shape))    
+    enet_p = np.minimum((2*np.minimum(ge,le)+1)/(p_perm_num+1), np.ones(ge.shape))    
     model_data['enet']['pval'] = enet_p
     logger.info('DONE.')
     
@@ -194,9 +194,9 @@ def run_regressions(df, X_names, y_name, fold_num, seed, l1_ratio_list, alpha_li
     # Permutations
     np.random.seed(seed)
     model_data['ridge']['seed'] = seed
-    perm_betas = np.empty([X_st.shape[1], p_perm_num-1])
+    perm_betas = np.empty([X_st.shape[1], p_perm_num])
     perm_betas[:] = np.nan
-    for i in tqdm(range(p_perm_num-1)):
+    for i in tqdm(range(p_perm_num)):
         y_perm = np.random.permutation(y)
         if not cv_in_perm:
             res = ridge_model_simple.fit(X_st, y_perm)
@@ -210,7 +210,7 @@ def run_regressions(df, X_names, y_name, fold_num, seed, l1_ratio_list, alpha_li
     # Get p values
     ge = np.sum(perm_betas <= ridge_params['raw_coef'][:, None], axis=1)
     le = np.sum(perm_betas >= ridge_params['raw_coef'][:, None], axis=1)
-    ridge_p = (2*np.minimum(ge,le)+1)/p_perm_num    
+    ridge_p = (2*np.minimum(ge,le)+1)/(p_perm_num+1)    
     model_data['ridge']['pval'] = ridge_p
     logger.info('DONE.')
     
