@@ -22,17 +22,21 @@ save_pdf = True
 with open(SETTINGS_DIR + '/params.yaml') as file:
     p = yaml.full_load(file)
 
-study_list = list(p['studies'].keys())
+study_list = list(p['studies'].keys()) + ['verif', 'proof']
 
 # Boxplot statistics
 def boxplot_stats(plot_data, study_list, ax):
     y_min = min(plot_data['value'])
     y_max = max(plot_data['value'])
-    for i in range(0,3):
+    for i in range(0,5):
         if i == 2:
             a = 0
             b = 2
             y = y_min-(y_max-y_min)*0.095
+        elif i > 2:
+            a = 1
+            b = i
+            y = y_min-(y_max-y_min)*(0.095+0.050*(i-2))
         else:
             a = i
             b = i + 1
@@ -58,7 +62,7 @@ def boxplot_stats(plot_data, study_list, ax):
             else:
                 color = 'r'
             plt.text((x1+x2)*.5, y-(y_max-y_min)*0.015, p_str, ha='center',
-                     va='top', color=color, fontsize=8)
+                     va='top', color=color, fontsize=6)
             # Debug
             # print('A: {}, B: {}, Sum: {}'.format(len(data_a), len(data_b), len(data_a)+len(data_b)))
         except:
@@ -71,15 +75,29 @@ def boxplot_stats(plot_data, study_list, ax):
 results_dir = os.path.join(RESULTS_DIR, 'compare_studies', 'et_features')
 os.makedirs(results_dir, exist_ok=True)
 
-# Read data
+# Read data (ET from dys and control_2 studies)
 data = pd.read_pickle(
     os.path.join(RESULTS_DIR, 'df_data', 'all', 'et', 'et_features.pkl'))
+
+# Proofreading (ET features)
+data_proofreading = pd.read_pickle(
+    os.path.join(RESULTS_DIR, 'df_data', 'dys_study', 'proofreading', 'proofreading.pkl'))
+data_proofreading['study'] = 'proof'
+data_proofreading['condition'] = 'SP2'
+
+# Sentence verification (ET features)
+data_sentence_verification = pd.read_pickle(
+    os.path.join(RESULTS_DIR, 'df_data', 'dys_study', 'sentence_verification', 'sentence_verification.pkl'))
+data_sentence_verification['study'] = 'verif'
+data_sentence_verification['condition'] = 'SP2'
+
+data = pd.concat([data, data_proofreading, data_sentence_verification], ignore_index=True, sort=False)
 
 # Generate plots
 for meas_type in ['', '_all']:
     meas_list = p['params']['et']['meas_list' + meas_type]
     if save_pdf:
-        pdf = PdfPages(results_dir + '/ET_feature_compare' + meas_type + '.pdf')     
+        pdf = PdfPages(results_dir + '/ET_feature_compare' + meas_type + '.pdf')
     for feature in meas_list:
         print('Running feature: {}'.format(feature))
         
@@ -91,7 +109,7 @@ for meas_type in ['', '_all']:
                 cond = 'NS'
             else:
                 cond = 'SP2'
-            temp_data[study] = (data[(data['study'] == study) & (data['condition'] == cond) 
+            temp_data[study] = (data[(data['study'] == study) & (data['condition'] == cond)
                               & (data['group'] == gp)].loc[:, feature]).reset_index(drop=True)
         plot_data = pd.DataFrame(temp_data).melt(var_name='study').dropna()
         
@@ -156,10 +174,10 @@ data = data[(data.condition == 'SP2') | data.condition.isna()]
 # Merge all measure varname
 meas_list = (
     meas_list_3dmh 
-    # + meas_list_wais
+    + meas_list_wais
     + meas_list_perf
-    # + meas_list_vsp
-    # + meas_list_word_info
+    + meas_list_vsp
+    + meas_list_word_info
     )
 
 if save_pdf:

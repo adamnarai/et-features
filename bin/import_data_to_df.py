@@ -314,7 +314,7 @@ data_path = ROOT_DIR + p['studies'][study]['experiments']['proofreading']['data_
 
 # Get data
 df = pd.read_csv(data_path, index_col='subject').reset_index().rename(columns={'subject':'subj_id', 'label':'group'})
-df.columns = [str(col) + '_proof' if col not in {'study', 'group','subj_id'} else col for col in df.columns]
+# df.columns = [str(col) + '_proof' if col not in {'study', 'group','subj_id'} else col for col in df.columns]
 df['group'].replace({1:'dyslexic', 2:'control'}, inplace=True)
 df['study'] = study
 
@@ -335,7 +335,7 @@ data_path = ROOT_DIR + p['studies'][study]['experiments']['sentence_verification
 
 # Get data
 df = pd.read_csv(data_path, index_col='subject').reset_index().rename(columns={'subject':'subj_id', 'label':'group'})
-df.columns = [str(col) + '_verif' if col not in {'study', 'group','subj_id'} else col for col in df.columns]
+# df.columns = [str(col) + '_verif' if col not in {'study', 'group','subj_id'} else col for col in df.columns]
 df['group'].replace({1:'dyslexic', 2:'control'}, inplace=True)
 df['study'] = study
 

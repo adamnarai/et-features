@@ -180,10 +180,10 @@ params:
             - Med_saccamp
             - Perc_fsacc
             - Perc_sacc_gliss
-            # - Perc_fsacc_gliss
-            # - Perc_bsacc_gliss
-            # - Perc_fsacc_fgliss
-            # - Perc_bsacc_fgliss
+            - Perc_fsacc_gliss
+            - Perc_bsacc_gliss
+            - Perc_fsacc_fgliss
+            - Perc_bsacc_fgliss
             - Med_fsaccamp
             - Med_bsaccamp
             - Perc_fgliss
@@ -205,10 +205,10 @@ params:
             - Med_fsnum_wnum
             - Med_bsnum_wnum
             - Med_saccpvel
-            # - Perc_lvel_gliss
+            - Perc_lvel_gliss
             - Med_glisspvel
-            # - Med_lvglisspvel
-            # - Med_hvglisspvel
+            - Med_lvglisspvel
+            - Med_hvglisspvel
             
         # Minimal (non-redundant) measure list
         meas_list_min:
@@ -419,62 +419,62 @@ params:
     proofreading:        
         # Measures selected for analyses
         meas_list:
-            - Med_rspeed_wnum_proof
-            - Med_fixdur_proof
-            - Med_saccamp_proof
-            - Perc_fsacc_proof
-            - Perc_sacc_gliss_proof
-            - Med_fsaccamp_proof
-            - Med_bsaccamp_proof
-            - Perc_fgliss_proof
-            - Freq_fsacc_proof
-            - Freq_bsacc_proof
-            - Med_avgN_proof
-            - Med_stdN_proof
-            - Med_spdt_proof
-            - Med_saccdur_proof
-            - Med_fsaccdur_proof
-            - Med_bsaccdur_proof
-            - Med_glissdur_proof
-            - Med_fglissdur_proof
-            - Med_bglissdur_proof
-            - Med_glissamp_proof
-            - Med_fglissamp_proof
-            - Med_bglissamp_proof
-            - Med_tsaccnum_per_wnum_proof
-            - Med_fsaccnum_per_wnum_proof
-            - Med_bsaccnum_per_wnum_proof
-            - Med_saccpvel_proof
-            - Med_glisspvel_proof
+            - Med_rspeed_wnum
+            - Med_fixdur
+            - Med_saccamp
+            - Perc_fsacc
+            - Perc_sacc_gliss
+            - Med_fsaccamp
+            - Med_bsaccamp
+            - Perc_fgliss
+            - Freq_fsacc
+            - Freq_bsacc
+            - Med_avgN
+            - Med_stdN
+            - Med_spdt
+            - Med_saccdur
+            - Med_fsaccdur
+            - Med_bsaccdur
+            - Med_glissdur
+            - Med_fglissdur
+            - Med_bglissdur
+            - Med_glissamp
+            - Med_fglissamp
+            - Med_bglissamp
+            - Med_tsnum_wnum
+            - Med_fsnum_wnum
+            - Med_bsnum_wnum
+            - Med_saccpvel
+            - Med_glisspvel
             
     sentence_verification:        
         # Measures selected for analyses
         meas_list:
-            - Med_rspeed_wnum_verif
-            - Med_fixdur_verif
-            - Med_saccamp_verif
-            - Perc_fsacc_verif
-            - Perc_sacc_gliss_verif
-            - Med_fsaccamp_verif
-            - Med_bsaccamp_verif
-            - Perc_fgliss_verif
-            - Freq_fsacc_verif
-            - Freq_bsacc_verif
-            - Med_avgN_verif
-            - Med_stdN_verif
-            - Med_spdt_verif
-            - Med_saccdur_verif
-            - Med_fsaccdur_verif
-            - Med_bsaccdur_verif
-            - Med_glissdur_verif
-            - Med_fglissdur_verif
-            - Med_bglissdur_verif
-            - Med_glissamp_verif
-            - Med_fglissamp_verif
-            - Med_bglissamp_verif
-            - Med_tsaccnum_per_wnum_verif
-            - Med_fsaccnum_per_wnum_verif
-            - Med_bsaccnum_per_wnum_verif
-            - Med_saccpvel_verif
-            - Med_glisspvel_verif
+            - Med_rspeed_wnum
+            - Med_fixdur
+            - Med_saccamp
+            - Perc_fsacc
+            - Perc_sacc_gliss
+            - Med_fsaccamp
+            - Med_bsaccamp
+            - Perc_fgliss
+            - Freq_fsacc
+            - Freq_bsacc
+            - Med_avgN
+            - Med_stdN
+            - Med_spdt
+            - Med_saccdur
+            - Med_fsaccdur
+            - Med_bsaccdur
+            - Med_glissdur
+            - Med_fglissdur
+            - Med_bglissdur
+            - Med_glissamp
+            - Med_fglissamp
+            - Med_bglissamp
+            - Med_tsnum_wnum
+            - Med_fsnum_wnum
+            - Med_bsnum_wnum
+            - Med_saccpvel
+            - Med_glisspvel
 

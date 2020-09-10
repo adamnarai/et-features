@@ -9,7 +9,8 @@ def load_params(path=SETTINGS_DIR + '/params.yaml'):
     return p
     
 # TODO: Currently loads everything and filters, should not load unnecessary data
-def import_et_behav_data(p, experiments=['et', '3dmh', 'wais', 'perf', 'vsp', 'word_info'], et_feature_list='meas_list'):
+def import_et_behav_data(p, experiments=['et', '3dmh', 'wais', 'perf', 'vsp', 'word_info', 'proofreading', 'sentence_verification'],
+                         et_feature_list='meas_list'):
     # Read data
     meas_list = dict()
     # ET
@@ -43,6 +44,18 @@ def import_et_behav_data(p, experiments=['et', '3dmh', 'wais', 'perf', 'vsp', 'w
     data_word_info = pd.read_pickle(
         os.path.join(RESULTS_DIR, 'df_data', 'all', 'et', 'word_info.pkl'))
     meas_list['word_info'] = p['params']['et']['word_info_list']
+    
+    # Proofreading
+    data_proof = pd.read_pickle(
+        os.path.join(RESULTS_DIR, 'df_data', 'dys_study', 'proofreading', 'proofreading.pkl'))
+    data_proof.columns = ['_'.join([c, 'proof']) if c in p['params']['proofreading']['meas_list'] else c for c in data_proof.columns]
+    meas_list['proofreading'] = ['_'.join([s, 'proof']) for s in p['params']['proofreading']['meas_list']]
+    
+    # Proofreading
+    data_verif = pd.read_pickle(
+        os.path.join(RESULTS_DIR, 'df_data', 'dys_study', 'sentence_verification', 'sentence_verification.pkl'))
+    data_verif.columns = ['_'.join([c, 'verif']) if c in p['params']['sentence_verification']['meas_list'] else c for c in data_verif.columns]
+    meas_list['sentence_verification'] = ['_'.join([s, 'verif']) for s in p['params']['sentence_verification']['meas_list']]
 
     # Merge all data
     data = data_et.merge(data_3dmh, how='outer', on=['study', 'group', 'subj_id'])
@@ -50,6 +63,8 @@ def import_et_behav_data(p, experiments=['et', '3dmh', 'wais', 'perf', 'vsp', 'w
     data = data.merge(data_vsp, how='outer', on=['group', 'condition', 'spacing_size', 'subj_id'])
     data = data.merge(data_perf, how='outer', on=['study', 'group', 'condition', 'spacing_size', 'subj_id'])
     data = data.merge(data_word_info, how='outer', on=['study', 'group', 'condition', 'subj_id'])
+    data = data.merge(data_proof, how='outer', on=['study', 'group', 'subj_id'])
+    data = data.merge(data_verif, how='outer', on=['study', 'group', 'subj_id'])
 
     # Merge all measure varname
     plot_meas_list = sum([meas_list[exp] for exp in experiments], [])

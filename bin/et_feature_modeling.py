@@ -51,7 +51,7 @@ consoleHandler.setFormatter(log_formatter)
 logger.addHandler(consoleHandler)
 
 # Params
-experiments = ['et']            # et, 3dmh, wais, perf, vsp, word_info
+experiment = 'proofreading'            # et, proofreading, sentence_verification
 study_list = list(p['studies'].keys())
 gp_list = ['dyslexic', 'control']
 cond_list = ['SP1', 'SP2', 'SP3', 'SP4', 'SP5', 'MS', 'NS', 'DS']   # SP1, SP2, SP3, SP4, SP5, MS, NS, DS
@@ -59,7 +59,18 @@ dep_var = 'Med_rspeed_wnum'
 save_pdf = True
 complex_models = True
 simple_models = True
-et_feature_list = ['meas_list_min_2', 'meas_list_min']#, 'meas_list']
+et_feature_list = ['meas_list']#['meas_list_min_2', 'meas_list_min']#, 'meas_list']
+
+# Params
+experiments = ['proofreading']            # et, proofreading, sentence_verification
+study_list = ['dys']
+gp_list = ['dyslexic', 'control']
+cond_list = ['SP2']   # SP1, SP2, SP3, SP4, SP5, MS, NS, DS
+dep_var = 'Med_rspeed_wnum_proof'
+save_pdf = True
+complex_models = False
+simple_models = True
+et_feature_list = ['meas_list']
 
 # Model params
 cv_in_perm = False
@@ -78,11 +89,11 @@ enet_max_iter = 10000
 ridge_alpha_N = 20
 alpha_list = np.logspace(-2, 2, ridge_alpha_N)
 
-def create_pdf(study, gp, cond, et_features):
+def create_pdf(exp, study, gp, cond, et_features):
     sub_dir = f'/{study}/{gp}/{cond}/{et_features}'
     os.makedirs(results_dir + sub_dir, exist_ok=True)
     meta_str = f'fold{fold_num}_perm{p_perm_num}_enet_L1N{l1_ratio_N}_alphN{enet_alpha_N}_ridge_alphN{ridge_alpha_N}_cvinperm{int(cv_in_perm)}'
-    out_path = results_dir + sub_dir + '/ET_regr_{}'.format(meta_str)
+    out_path = results_dir + sub_dir + '/{}_regr_{}'.format(exp.upper(), meta_str)
     pdf = PdfPages(out_path + '.pdf')
     return pdf, out_path
             
@@ -269,7 +280,7 @@ def run_regressions(df, X_names, y_name, fold_num, seed, l1_ratio_list, alpha_li
 for et_features, fold_num in product(et_feature_list, fold_num_list):
     start_time = timeit.default_timer()
     # Import data
-    data, meas_list = import_et_behav_data(p, experiments=experiments, et_feature_list=et_features)
+    data, meas_list = import_et_behav_data(p, experiments=[experiment], et_feature_list=et_features)
     
     # Feature list
     X_names = meas_list.copy()
@@ -284,7 +295,7 @@ for et_features, fold_num in product(et_feature_list, fold_num_list):
             if df.empty:
                 continue
             if save_pdf:
-                pdf, out_path = create_pdf(study, gp, cond, et_features)
+                pdf, out_path = create_pdf(experiment, study, gp, cond, et_features)
 
             # Run ENET and Ridge regressions
             model_data = run_regressions(df, X_names, y_name, fold_num, seed, 
@@ -306,7 +317,7 @@ for et_features, fold_num in product(et_feature_list, fold_num_list):
             if df.empty:
                 continue
             if save_pdf:
-                pdf, out_path = create_pdf(study, gp, cond, et_features)
+                pdf, out_path = create_pdf(experiment, study, gp, cond, et_features)
             
             # Run ENET and Ridge regression
             model_data = run_regressions(df, ['spacing_size'] + X_names, y_name, fold_num, seed, 
@@ -334,7 +345,7 @@ for et_features, fold_num in product(et_feature_list, fold_num_list):
                     else:
                         binary_vars_str = ''
                     if save_pdf:
-                        pdf, out_path = create_pdf(study, gp, cond, et_features + '/' + model_type + binary_vars_str)
+                        pdf, out_path = create_pdf(experiment, study, gp, cond, et_features + '/' + model_type + binary_vars_str)
                     if model_type == 'standard':
                         # Run standard regression
                         model_data = run_regressions(df, ['group'] + X_names, y_name, fold_num, seed, 
@@ -377,7 +388,7 @@ for et_features, fold_num in product(et_feature_list, fold_num_list):
                     else:
                         binary_vars_str = ''
                     if save_pdf:
-                        pdf, out_path = create_pdf(study, gp, cond, et_features + '/' + model_type + binary_vars_str)
+                        pdf, out_path = create_pdf(experiment, study, gp, cond, et_features + '/' + model_type + binary_vars_str)
                     if model_type == 'standard':
                         # Run standard regression
                         model_data = run_regressions(df, ['group'] + ['spacing_size'] + X_names, y_name, fold_num, seed, 
