@@ -62,15 +62,15 @@ simple_models = True
 et_feature_list = ['meas_list']#['meas_list_min_2', 'meas_list_min']#, 'meas_list']
 
 # Params
-experiments = ['proofreading']            # et, proofreading, sentence_verification
+experiments = 'sentence_verification'           # et, proofreading, sentence_verification
 study_list = ['dys']
 gp_list = ['dyslexic', 'control']
 cond_list = ['SP2']   # SP1, SP2, SP3, SP4, SP5, MS, NS, DS
-dep_var = 'Med_rspeed_wnum_proof'
+dep_var = 'Med_rspeed_wnum_verif'
 save_pdf = True
 complex_models = False
 simple_models = True
-et_feature_list = ['meas_list']
+et_feature_list = ['meas_list', 'meas_list_2']
 
 # Model params
 cv_in_perm = False

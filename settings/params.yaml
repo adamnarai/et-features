@@ -421,7 +421,6 @@ params:
         meas_list:
             - Med_rspeed_wnum
             - Med_fixdur
-            - Med_saccamp
             - Perc_fsacc
             - Perc_sacc_gliss
             - Med_fsaccamp
@@ -429,21 +428,33 @@ params:
             - Perc_fgliss
             - Freq_fsacc
             - Freq_bsacc
-            - Med_avgN
-            - Med_stdN
             - Med_spdt
-            - Med_saccdur
             - Med_fsaccdur
             - Med_bsaccdur
-            - Med_glissdur
             - Med_fglissdur
             - Med_bglissdur
-            - Med_glissamp
             - Med_fglissamp
             - Med_bglissamp
-            - Med_tsnum_wnum
             - Med_fsnum_wnum
             - Med_bsnum_wnum
+            - Med_saccpvel
+            - Med_glisspvel
+        
+        meas_list_2:
+            - Med_rspeed_wnum
+            - Med_fixdur
+            - Perc_fsacc
+            - Perc_sacc_gliss
+            - Med_fsaccamp
+            - Med_bsaccamp
+            - Perc_fgliss
+            - Med_spdt
+            - Med_fsaccdur
+            - Med_bsaccdur
+            - Med_fglissdur
+            - Med_bglissdur
+            - Med_fglissamp
+            - Med_bglissamp
             - Med_saccpvel
             - Med_glisspvel
             
@@ -452,7 +463,6 @@ params:
         meas_list:
             - Med_rspeed_wnum
             - Med_fixdur
-            - Med_saccamp
             - Perc_fsacc
             - Perc_sacc_gliss
             - Med_fsaccamp
@@ -460,21 +470,33 @@ params:
             - Perc_fgliss
             - Freq_fsacc
             - Freq_bsacc
-            - Med_avgN
-            - Med_stdN
             - Med_spdt
-            - Med_saccdur
             - Med_fsaccdur
             - Med_bsaccdur
-            - Med_glissdur
             - Med_fglissdur
             - Med_bglissdur
-            - Med_glissamp
             - Med_fglissamp
             - Med_bglissamp
-            - Med_tsnum_wnum
             - Med_fsnum_wnum
             - Med_bsnum_wnum
+            - Med_saccpvel
+            - Med_glisspvel
+        
+        meas_list_2:
+            - Med_rspeed_wnum
+            - Med_fixdur
+            - Perc_fsacc
+            - Perc_sacc_gliss
+            - Med_fsaccamp
+            - Med_bsaccamp
+            - Perc_fgliss
+            - Med_spdt
+            - Med_fsaccdur
+            - Med_bsaccdur
+            - Med_fglissdur
+            - Med_bglissdur
+            - Med_fglissamp
+            - Med_bglissamp
             - Med_saccpvel
             - Med_glisspvel
 
