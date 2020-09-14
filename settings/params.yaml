@@ -418,7 +418,7 @@ params:
             
     proofreading:        
         # Measures selected for analyses
-        meas_list:
+        meas_list_min:
             - Med_rspeed_wnum
             - Med_fixdur
             - Perc_fsacc
@@ -440,7 +440,7 @@ params:
             - Med_saccpvel
             - Med_glisspvel
         
-        meas_list_2:
+        meas_list_min_2:
             - Med_rspeed_wnum
             - Med_fixdur
             - Perc_fsacc
@@ -460,7 +460,7 @@ params:
             
     sentence_verification:        
         # Measures selected for analyses
-        meas_list:
+        meas_list_min:
             - Med_rspeed_wnum
             - Med_fixdur
             - Perc_fsacc
@@ -482,7 +482,7 @@ params:
             - Med_saccpvel
             - Med_glisspvel
         
-        meas_list_2:
+        meas_list_min_2:
             - Med_rspeed_wnum
             - Med_fixdur
             - Perc_fsacc
