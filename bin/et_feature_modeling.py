@@ -16,6 +16,7 @@ from sklearn.linear_model import LinearRegression, RidgeCV, ElasticNetCV, Ridge,
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import mean_squared_error, r2_score
 from sklearn.exceptions import ConvergenceWarning
+from sklearn.model_selection import cross_validate
 import matplotlib.pyplot as plt
 from matplotlib.gridspec import GridSpec
 from matplotlib.backends.backend_pdf import PdfPages
@@ -62,7 +63,7 @@ simple_models = True
 et_feature_list = ['meas_list']#['meas_list_min_2', 'meas_list_min']#, 'meas_list']
 
 # Params
-experiments = 'sentence_verification'           # et, proofreading, sentence_verification
+experiment = 'sentence_verification'           # et, proofreading, sentence_verification
 study_list = ['dys']
 gp_list = ['dyslexic', 'control']
 cond_list = ['SP2']   # SP1, SP2, SP3, SP4, SP5, MS, NS, DS
@@ -71,6 +72,17 @@ save_pdf = True
 complex_models = False
 simple_models = True
 et_feature_list = ['meas_list', 'meas_list_2']
+
+# Params
+experiment = 'et'           # et, proofreading, sentence_verification
+study_list = ['letter_spacing']
+gp_list = ['control']
+cond_list = ['MS', 'NS', 'DS']   # SP1, SP2, SP3, SP4, SP5, MS, NS, DS
+dep_var = 'Med_rspeed_wnum'
+save_pdf = True
+complex_models = False
+simple_models = False
+et_feature_list = ['meas_list_min_3']
 
 # Model params
 cv_in_perm = False
@@ -308,6 +320,39 @@ for et_features, fold_num in product(et_feature_list, fold_num_list):
                 plt.savefig(out_path + '.png')
                 plt.close()
                 pdf.close()
+    
+    # Add data and prediction performance to pkl
+    for study, gp, cond in product(study_list, gp_list, cond_list):
+        df = data[(data['study'] == study) & (data['condition'] == cond)
+                         & (data['group'] == gp)].loc[:, meas_list]
+        if df.empty:
+            continue
+        
+        sub_dir = f'/{study}/{gp}/{cond}/{et_features}'
+        meta_str = f'fold{fold_num}_perm{p_perm_num}_enet_L1N{l1_ratio_N}_alphN{enet_alpha_N}_ridge_alphN{ridge_alpha_N}_cvinperm{int(cv_in_perm)}'
+        out_path = results_dir + sub_dir + '/{}_regr_{}'.format(experiment.upper(), meta_str)
+    
+        # Get data
+        X = df[X_names]
+        y = df[y_name]
+        
+        # Standardize data
+        scaler = StandardScaler()
+        X_st = scaler.fit_transform(X)
+        X_st = pd.DataFrame(X_st, index=X.index, columns=X.columns)
+            
+        with open(out_path + '.pkl', 'rb') as file:
+            model_data = pickle.load(file)
+        model_data['data'] = dict()
+        model_data['data']['X'] = X
+        model_data['data']['X_st'] = X_st
+        model_data['data']['y'] = y
+        
+        print(et_features + ' ' + study + ' ' + cond + ': ' + 
+              str(np.median(cross_validate(model_data['enet']['simple_model'], X_st, y, scoring='r2', cv=10)['test_score'])))
+        
+        with open(out_path + '.pkl', 'wb') as file:
+            pickle.dump(model_data, file)
         
     if complex_models:
         # Models including spacing
