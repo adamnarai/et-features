@@ -51,27 +51,27 @@ consoleHandler = logging.StreamHandler()
 consoleHandler.setFormatter(log_formatter)
 logger.addHandler(consoleHandler)
 
-# Params
-experiment = 'proofreading'            # et, proofreading, sentence_verification
-study_list = list(p['studies'].keys())
-gp_list = ['dyslexic', 'control']
-cond_list = ['SP1', 'SP2', 'SP3', 'SP4', 'SP5', 'MS', 'NS', 'DS']   # SP1, SP2, SP3, SP4, SP5, MS, NS, DS
-dep_var = 'Med_rspeed_wnum'
-save_pdf = True
-complex_models = True
-simple_models = True
-et_feature_list = ['meas_list']#['meas_list_min_2', 'meas_list_min']#, 'meas_list']
+# # Params
+# experiment = 'proofreading'            # et, proofreading, sentence_verification
+# study_list = list(p['studies'].keys())
+# gp_list = ['dyslexic', 'control']
+# cond_list = ['SP1', 'SP2', 'SP3', 'SP4', 'SP5', 'MS', 'NS', 'DS']   # SP1, SP2, SP3, SP4, SP5, MS, NS, DS
+# dep_var = 'Med_rspeed_wnum'
+# save_pdf = True
+# complex_models = True
+# simple_models = True
+# et_feature_list = ['meas_list']#['meas_list_min_2', 'meas_list_min']#, 'meas_list']
 
 # Params
-experiment = 'sentence_verification'           # et, proofreading, sentence_verification
+experiment = 'proofreading'           # et, proofreading, sentence_verification
 study_list = ['dys']
 gp_list = ['dyslexic', 'control']
 cond_list = ['SP2']   # SP1, SP2, SP3, SP4, SP5, MS, NS, DS
-dep_var = 'Med_rspeed_wnum_verif'
+dep_var = 'Med_rspeed_wnum_proof'
 save_pdf = True
 complex_models = False
 simple_models = True
-et_feature_list = ['meas_list', 'meas_list_2']
+et_feature_list = ['meas_list_min', 'meas_list_min_2']
 
 # Params
 experiment = 'et'           # et, proofreading, sentence_verification
@@ -85,7 +85,7 @@ simple_models = False
 et_feature_list = ['meas_list_min_3']
 
 # Model params
-cv_in_perm = False
+cv_in_perm = True
 fold_num_list = [10]
 p_perm_num = 1000
 
