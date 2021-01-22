@@ -41,7 +41,7 @@ os.makedirs(results_dir, exist_ok=True)
 data_long = pd.melt(data, id_vars=['group','condition','subj_id'], var_name = 'measure', value_name = 'value')
 
 # %% Generate pdf from figures
-for meas_type in ['', '_all']:
+for meas_type in ['_min', '', '_all']:
     meas_list = p['params']['et']['meas_list' + meas_type]
     if save_pdf:
         pdf = PdfPages(results_dir + '/' + study + '_ET_stats' + meas_type + '.pdf')

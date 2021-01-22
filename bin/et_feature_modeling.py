@@ -29,6 +29,7 @@ from datetime import datetime
 import warnings
 from tqdm import tqdm
 import pickle
+from yellowbrick.regressor import residuals_plot
 
 # Load params YAML
 p = load_params()
@@ -79,10 +80,10 @@ study_list = ['letter_spacing']
 gp_list = ['control']
 cond_list = ['MS', 'NS', 'DS']   # SP1, SP2, SP3, SP4, SP5, MS, NS, DS
 dep_var = 'Med_rspeed_wnum'
-save_pdf = True
+save_pdf = False
 complex_models = False
 simple_models = False
-et_feature_list = ['meas_list_min_3']
+et_feature_list = ['meas_list_min_2']
 
 # Model params
 cv_in_perm = True
@@ -348,8 +349,24 @@ for et_features, fold_num in product(et_feature_list, fold_num_list):
         model_data['data']['X_st'] = X_st
         model_data['data']['y'] = y
         
-        print(et_features + ' ' + study + ' ' + cond + ': ' + 
-              str(np.median(cross_validate(model_data['enet']['simple_model'], X_st, y, scoring='r2', cv=10)['test_score'])))
+        r2 = r2_score(y, model_data['enet']['simple_model'].predict(X_st))
+        n = X_st.shape[0]
+        rp = X_st.shape[1]
+        adj_r2 = 1-(1-r2)*(n-1)/(n-rp-1)
+        med_cv_r2 = np.median(cross_validate(model_data['enet']['simple_model'], X_st, y, scoring='r2', cv=fold_num)['test_score'])
+        f12_cv_r2_list = cross_validate(model_data['enet']['simple_model'], X_st, y, scoring='r2', cv=12)['test_score']
+        med_12f_cv_r2 = np.median([1-(1-x)*((n-2)-1)/((n-2)-rp-1) for x in f12_cv_r2_list])
+                
+        with open(out_path + '.txt', 'w') as file:
+            file.write('R2: ' + str(r2) + '\n')
+            file.write('adjusted R2: ' + str(adj_r2) + '\n')
+            file.write('median ' + str(fold_num) + '-fold cv (predicted) R2: ' + str(med_cv_r2) + '\n')
+            file.write('median 12-fold cv (predicted) R2: ' + str(med_12f_cv_r2) + '\n')
+            file.write('median 12-fold cv (predicted) adjusted R2: ' + str(med_12f_cv_adj_r2) + '\n')
+        
+        plt.figure()
+        residuals_plot(model_data['enet']['simple_model'], X_st, y, hist=False)
+        plt.savefig(out_path + 'residuals_plot.png')
         
         with open(out_path + '.pkl', 'wb') as file:
             pickle.dump(model_data, file)

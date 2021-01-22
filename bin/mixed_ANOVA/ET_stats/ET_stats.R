@@ -56,9 +56,6 @@ data <- melt(id.vars = c('condition', 'group', 'subj_id'),
              measure.vars = colnames(data)[-match(c('condition', 'group', 'subj_id'), colnames(data))],
              variable.name = 'measure', data = data)
 
-# Remove outlier subjects
-data <- data[!(data$subj_id %in% p$outlier_subj)]
-
 # Loop for measures
 for (meas in p$meas_list){
   # Perform mixed ANOVA
@@ -68,6 +65,5 @@ for (meas in p$meas_list){
   ezANOVA_res = mixed_ANOVA_res$ezANOVA$ANOVA
   lme_anova = anova(mixed_ANOVA_res$lme_anova)
   ph_summary = subset(tidy(mixed_ANOVA_res$ph_summary), select = -rhs)
-  save(ezANOVA_res, lme_anova, ph_summary, file = sprintf("%s/mixed_ANOVA_%s.RData", p$stats_dir, meas))
+  save(ezANOVA_res, lme_anova, ph_summary, file = sprintf("%s/ET_ANOVA_%s.RData", p$stats_dir, meas))
 }
-
