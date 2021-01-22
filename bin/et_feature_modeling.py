@@ -16,6 +16,7 @@ from sklearn.linear_model import LinearRegression, RidgeCV, ElasticNetCV, Ridge,
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import mean_squared_error, r2_score
 from sklearn.exceptions import ConvergenceWarning
+from sklearn.model_selection import cross_validate
 import matplotlib.pyplot as plt
 from matplotlib.gridspec import GridSpec
 from matplotlib.backends.backend_pdf import PdfPages
@@ -28,6 +29,7 @@ from datetime import datetime
 import warnings
 from tqdm import tqdm
 import pickle
+from yellowbrick.regressor import residuals_plot
 
 # Load params YAML
 p = load_params()
@@ -50,30 +52,41 @@ consoleHandler = logging.StreamHandler()
 consoleHandler.setFormatter(log_formatter)
 logger.addHandler(consoleHandler)
 
-# Params
-experiment = 'proofreading'            # et, proofreading, sentence_verification
-study_list = list(p['studies'].keys())
-gp_list = ['dyslexic', 'control']
-cond_list = ['SP1', 'SP2', 'SP3', 'SP4', 'SP5', 'MS', 'NS', 'DS']   # SP1, SP2, SP3, SP4, SP5, MS, NS, DS
-dep_var = 'Med_rspeed_wnum'
-save_pdf = True
-complex_models = True
-simple_models = True
-et_feature_list = ['meas_list']#['meas_list_min_2', 'meas_list_min']#, 'meas_list']
+# # Params
+# experiment = 'proofreading'            # et, proofreading, sentence_verification
+# study_list = list(p['studies'].keys())
+# gp_list = ['dyslexic', 'control']
+# cond_list = ['SP1', 'SP2', 'SP3', 'SP4', 'SP5', 'MS', 'NS', 'DS']   # SP1, SP2, SP3, SP4, SP5, MS, NS, DS
+# dep_var = 'Med_rspeed_wnum'
+# save_pdf = True
+# complex_models = True
+# simple_models = True
+# et_feature_list = ['meas_list']#['meas_list_min_2', 'meas_list_min']#, 'meas_list']
 
 # Params
-experiments = 'sentence_verification'           # et, proofreading, sentence_verification
+experiment = 'proofreading'           # et, proofreading, sentence_verification
 study_list = ['dys']
 gp_list = ['dyslexic', 'control']
 cond_list = ['SP2']   # SP1, SP2, SP3, SP4, SP5, MS, NS, DS
-dep_var = 'Med_rspeed_wnum_verif'
+dep_var = 'Med_rspeed_wnum_proof'
 save_pdf = True
 complex_models = False
 simple_models = True
-et_feature_list = ['meas_list', 'meas_list_2']
+et_feature_list = ['meas_list_min', 'meas_list_min_2']
+
+# Params
+experiment = 'et'           # et, proofreading, sentence_verification
+study_list = ['letter_spacing']
+gp_list = ['control']
+cond_list = ['MS', 'NS', 'DS']   # SP1, SP2, SP3, SP4, SP5, MS, NS, DS
+dep_var = 'Med_rspeed_wnum'
+save_pdf = False
+complex_models = False
+simple_models = False
+et_feature_list = ['meas_list_min_2']
 
 # Model params
-cv_in_perm = False
+cv_in_perm = True
 fold_num_list = [10]
 p_perm_num = 1000
 
@@ -308,6 +321,55 @@ for et_features, fold_num in product(et_feature_list, fold_num_list):
                 plt.savefig(out_path + '.png')
                 plt.close()
                 pdf.close()
+    
+    # Add data and prediction performance to pkl
+    for study, gp, cond in product(study_list, gp_list, cond_list):
+        df = data[(data['study'] == study) & (data['condition'] == cond)
+                         & (data['group'] == gp)].loc[:, meas_list]
+        if df.empty:
+            continue
+        
+        sub_dir = f'/{study}/{gp}/{cond}/{et_features}'
+        meta_str = f'fold{fold_num}_perm{p_perm_num}_enet_L1N{l1_ratio_N}_alphN{enet_alpha_N}_ridge_alphN{ridge_alpha_N}_cvinperm{int(cv_in_perm)}'
+        out_path = results_dir + sub_dir + '/{}_regr_{}'.format(experiment.upper(), meta_str)
+    
+        # Get data
+        X = df[X_names]
+        y = df[y_name]
+        
+        # Standardize data
+        scaler = StandardScaler()
+        X_st = scaler.fit_transform(X)
+        X_st = pd.DataFrame(X_st, index=X.index, columns=X.columns)
+            
+        with open(out_path + '.pkl', 'rb') as file:
+            model_data = pickle.load(file)
+        model_data['data'] = dict()
+        model_data['data']['X'] = X
+        model_data['data']['X_st'] = X_st
+        model_data['data']['y'] = y
+        
+        r2 = r2_score(y, model_data['enet']['simple_model'].predict(X_st))
+        n = X_st.shape[0]
+        rp = X_st.shape[1]
+        adj_r2 = 1-(1-r2)*(n-1)/(n-rp-1)
+        med_cv_r2 = np.median(cross_validate(model_data['enet']['simple_model'], X_st, y, scoring='r2', cv=fold_num)['test_score'])
+        f12_cv_r2_list = cross_validate(model_data['enet']['simple_model'], X_st, y, scoring='r2', cv=12)['test_score']
+        med_12f_cv_r2 = np.median([1-(1-x)*((n-2)-1)/((n-2)-rp-1) for x in f12_cv_r2_list])
+                
+        with open(out_path + '.txt', 'w') as file:
+            file.write('R2: ' + str(r2) + '\n')
+            file.write('adjusted R2: ' + str(adj_r2) + '\n')
+            file.write('median ' + str(fold_num) + '-fold cv (predicted) R2: ' + str(med_cv_r2) + '\n')
+            file.write('median 12-fold cv (predicted) R2: ' + str(med_12f_cv_r2) + '\n')
+            file.write('median 12-fold cv (predicted) adjusted R2: ' + str(med_12f_cv_adj_r2) + '\n')
+        
+        plt.figure()
+        residuals_plot(model_data['enet']['simple_model'], X_st, y, hist=False)
+        plt.savefig(out_path + 'residuals_plot.png')
+        
+        with open(out_path + '.pkl', 'wb') as file:
+            pickle.dump(model_data, file)
         
     if complex_models:
         # Models including spacing

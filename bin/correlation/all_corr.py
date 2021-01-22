@@ -19,14 +19,14 @@ from na_py_tools.defaults import RESULTS_DIR, SETTINGS_DIR
 from utils import load_params, import_et_behav_data
 
 # Params
-experiments = ['proofreading'] # et, 3dmh, wais, perf, vsp, word_info, eeg, proofreading, sentence_verification
-conditions = ['SP2', 'NS']            # SP1, SP2, SP3, SP4, SP5, MS, NS, DS
+experiments = ['et'] # et, 3dmh, wais, perf, vsp, word_info, eeg, proofreading, sentence_verification
+conditions = ['NS']            # SP1, SP2, SP3, SP4, SP5, MS, NS, DS
 dmh_type = 'Ny'                 # Ny, St, Perc (only one at a time)
-et_feature_list = 'meas_list'   # meas_list, meas_list_all
+et_feature_list = 'meas_list_min'   # meas_list, meas_list_all
 plot_unsign = False             # As separate figure
 save_pdf = False
 globalplot = False
-corr_method = 'skipped'     # skipped, spearman, pearson
+corr_method = 'pearson'     # skipped, spearman, pearson
 
 # Load params YAML
 p = load_params()
@@ -35,7 +35,7 @@ p = load_params()
 data, plot_meas_list = import_et_behav_data(p, experiments=experiments, et_feature_list=et_feature_list)
 
 # Create reports dir
-results_dir = os.path.join(RESULTS_DIR, 'correlations', 'all')
+results_dir = os.path.join(RESULTS_DIR, 'correlations', 'all', corr_method)
 os.makedirs(results_dir, exist_ok=True)
 
 if globalplot:
@@ -55,7 +55,8 @@ def onclick(event, corr_data, labels, study, gp, cond, cond_data=None, fig_regrp
     labels_sub = labels[corr_data.iloc[:,x].notna() & corr_data.iloc[:,y].notna()]
                 
     # Spearman correlation
-    regr_stats = pg.corr(corr_data_sub.iloc[:,x], corr_data_sub.iloc[:,y], method='spearman')
+    regr_stats_p = pg.corr(corr_data_sub.iloc[:,x], corr_data_sub.iloc[:,y], method='pearson')
+    regr_stats_s = pg.corr(corr_data_sub.iloc[:,x], corr_data_sub.iloc[:,y], method='spearman')
     r, pval, outliers = pg.correlation.skipped(corr_data_sub.iloc[:,x], corr_data_sub.iloc[:,y], method='spearman')
 
     # Regrplot
@@ -68,7 +69,8 @@ def onclick(event, corr_data, labels, study, gp, cond, cond_data=None, fig_regrp
     for i, txt in enumerate(labels_sub):
         ax.annotate(txt, (corr_data_sub.iloc[i,x], corr_data_sub.iloc[i,y]))
     plt.title('study: {} | group: {} | condition: {}\n'.format(study, gp, cond)
-              + regr_stats.to_string(col_space=10) + '\n' 
+              + regr_stats_p.to_string(col_space=10) + '\n' 
+              + regr_stats_s.to_string(col_space=10) + '\n' 
               + 'skipped: r = {:.2f}  p = {:.4f}  outliers: {}'.format(r, pval, ', '.join(labels_sub[outliers])),
               fontsize=12)
     plt.subplots_adjust(top=0.85)
@@ -146,8 +148,11 @@ for study in list(p['studies'].keys()):
             # All r value
             for sign in [False, True]:
                 if sign:
+                    sign_str = 'significant (p<0.05)'
                     mask[(pval >= .05)] = True
-                elif not plot_unsign:
+                elif plot_unsign:
+                    sign_str = ''
+                else:
                     continue
 
                 # Correlation plot
@@ -168,8 +173,8 @@ for study in list(p['studies'].keys()):
                             fmt=".2f",
                             annot_kws={"fontsize":8},
                             mask=mask)
-                plt.title(gp + ' - ' + cond + ' - ' + study + ' - correlation (Spearman) significant (p<0.05)',
-                          fontsize=18, fontweight='bold')
+                plt.title(gp + ' - ' + cond + ' - ' + study + ' - correlation (' + corr_method + 
+                          ') ' + sign_str, fontsize=18, fontweight='bold')
                 plt.subplots_adjust(left=0.2, right=0.9, top=0.9, bottom=0.2)
                 if save_pdf:
                     pdf.savefig()

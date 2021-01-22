@@ -1,0 +1,182 @@
+# Paths
+data_path: './../../../data/dys_study/ET_features/AllSubjects48_TextLinesWithLeftValidation_correctionType1_limitedToReading_AllLines/AllSubsAllMeasuresOnOneSheetCondsOnSepSheets.xlsx'
+stats_dir: './../../../results/behav_ET_statistics/ET_stats'
+reports_dir: './../../../results/behav_ET_statistics/ET_stats/reports'
+
+# Subjects
+subjects: 
+    control: [foju, neda, buka, vikr, hoag, beni, jaga, kori,
+                  tita, keli, bama, doan, szida, csda, kocev,
+                  adre, urma, fope, mofr, koev, homa, plda,
+                  nemi, tado]
+                  
+    dyslexic: [pebe, vano, move, kodo, cski, buzs, luro, opcs,
+                  boda, mava, foti, lurov, mead, foja, rupa,
+                  komo, kani, duda, sako, elki, dobe, hlvi,
+                  road, hoor]
+
+# Groups (in numbering order)
+groups: 
+    1: dyslexic
+    2: control
+                  
+# Conditions
+cond_names: [SP1, SP2, SP3, SP4, SP5]
+                  
+# All measures
+meas_list_all:
+    - Seg_length
+    - Word_num
+    - Char_num
+    - Max_span
+    - Tot_sweep
+    - Med_rspeed_wnum
+    - Med_rspeed_chnum
+    - Med_rspeed_mspan
+    - Med_rspeed_tsweep
+    - Totnum_sacc
+    - Totnum_fsacc
+    - Totnum_bsacc
+    - Perc_fsacc
+    - Perc_bsacc
+    - Totnum_gliss
+    - Totnum_fgliss
+    - Totnum_bgliss
+    - Perc_fgliss
+    - Perc_bgliss
+    - Perc_sacc_gliss
+    - Perc_fsacc_gliss
+    - Perc_bsacc_gliss
+    - Perc_fsacc_fgliss
+    - Perc_fsacc_bgliss
+    - Perc_bsacc_fgliss
+    - Perc_bsacc_bgliss
+    - Totnum_lvel_gliss
+    - Totnum_hvel_gliss
+    - Perc_lvel_gliss
+    - Perc_hvel_gliss
+    - Perc_lvel_fgliss
+    - Perc_lvel_bgliss
+    - Perc_hvel_fgliss
+    - Perc_hvel_bgliss
+    - Totnum_gwcpeak
+    - Totnum_gscpeak
+    - Totnum_lvel_gwcpeak
+    - Totnum_hvel_gwcpeak
+    - Totnum_hvel_gwcpeakcorr
+    - Totnum_hvel_gscpeak
+    - Perc_gamp_critis
+    - Perc_gdur_critis
+    - Freq_fsacc
+    - Freq_bsacc
+    - Mean_meanfixvel
+    - Mean_stdevfixvel
+    - Med_saccpdetth
+    - Med_saccdur
+    - Med_fsaccdur
+    - Med_bsaccdur
+    - Med_saccamp
+    - Med_fsaccamp
+    - Med_bsaccamp
+    - Med_saccpvel
+    - Med_fsaccpvel
+    - Med_bsaccpvel
+    - Med_saccpacc
+    - Med_fsaccpacc
+    - Med_bsaccpacc
+    - Med_glissdur
+    - Med_fglissdur
+    - Med_bglissdur
+    - Med_lvglissdur
+    - Med_hvglissdur
+    - Med_glissamp
+    - Med_fglissamp
+    - Med_bglissamp
+    - Med_lvglissamp
+    - Med_hvglissamp
+    - Med_glisspvel
+    - Med_fglisspvel
+    - Med_bglisspvel
+    - Med_lvglisspvel
+    - Med_hvglisspvel
+    - Med_fixdur
+    - Med_fXpos
+    - Med_fYpos
+    - Med_tsnum_maxvisspan
+    - Med_fsnum_maxvisspan
+    - Med_bsnum_maxvisspan
+    - Med_tsnum_wnum
+    - Med_fsnum_wnum
+    - Med_bsnum_wnum
+    - Med_tsnum_chnum
+    - Med_fsnum_chnum
+    - Med_bsnum_chnum
+    - Sent_word_num
+
+# Measures selected for analyses
+meas_list:
+    - Med_rspeed_wnum
+    - Med_fixdur
+    - Med_saccamp
+    - Perc_fsacc
+    - Perc_sacc_gliss
+    - Perc_fsacc_fgliss
+    - Perc_bsacc_fgliss
+    - Med_fsaccamp
+    - Med_bsaccamp
+    - Perc_fgliss
+    - Perc_fsacc_gliss
+    - Perc_bsacc_gliss
+    - Freq_fsacc
+    - Freq_bsacc
+    - Mean_meanfixvel
+    - Mean_stdevfixvel
+    - Med_saccpdetth
+    - Med_saccdur
+    - Med_fsaccdur
+    - Med_bsaccdur
+    - Med_glissdur
+    - Med_fglissdur
+    - Med_bglissdur
+    - Med_glissamp
+    - Med_fglissamp
+    - Med_bglissamp
+    - Med_tsnum_wnum
+    - Med_fsnum_wnum
+    - Med_bsnum_wnum
+    - Med_saccpvel
+    - Perc_lvel_gliss
+    - Med_glisspvel
+    - Med_lvglisspvel
+    - Med_hvglisspvel
+
+# Post-hoc contrasts
+ph_contrasts:
+    - SP1.dyslexic - SP1.control = 0
+    - SP2.dyslexic - SP2.control = 0
+    - SP3.dyslexic - SP3.control = 0
+    - SP4.dyslexic - SP4.control = 0
+    - SP5.dyslexic - SP5.control = 0
+
+    - SP1.dyslexic - SP2.dyslexic = 0
+    - SP1.dyslexic - SP3.dyslexic = 0
+    - SP1.dyslexic - SP4.dyslexic = 0
+    - SP1.dyslexic - SP5.dyslexic = 0
+    - SP2.dyslexic - SP3.dyslexic = 0
+    - SP2.dyslexic - SP4.dyslexic = 0
+    - SP2.dyslexic - SP5.dyslexic = 0
+    - SP3.dyslexic - SP4.dyslexic = 0
+    - SP3.dyslexic - SP5.dyslexic = 0
+    - SP4.dyslexic - SP5.dyslexic = 0
+
+    - SP1.control - SP2.control = 0
+    - SP1.control - SP3.control = 0
+    - SP1.control - SP4.control = 0
+    - SP1.control - SP5.control = 0
+    - SP2.control - SP3.control = 0
+    - SP2.control - SP4.control = 0
+    - SP2.control - SP5.control = 0
+    - SP3.control - SP4.control = 0
+    - SP3.control - SP5.control = 0
+    - SP4.control - SP5.control = 0
+

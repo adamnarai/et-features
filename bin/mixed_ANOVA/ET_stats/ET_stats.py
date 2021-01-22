@@ -43,19 +43,18 @@ def p2star(p):
         return ''
     
 # Boxplot generation
-def boxplot_condition_group(data, y_label = '', cond_num=5, p_values = None, legend_loc=1):
-    data = data.sort_values(['group', 'condition'])
-    bp = sns.boxplot(x='condition', y='value', hue='group', data = data, showmeans=False, whis = np.inf)
+def boxplot_spacing_group(data, y_label = '', p_values = None, legend_loc=1):
+    bp = sns.boxplot(x='spacing', y='value', hue='group', data = data, showmeans=False, whis = np.inf)
     handles, labels = bp.get_legend_handles_labels()
-    plt.legend(loc=legend_loc, borderaxespad=1.5, frameon=False)
-    bp.set(xlabel='Condition', ylabel=y_label)
+    plt.legend(handles[0:2], ['Control', 'Dyslexic'], loc=legend_loc, borderaxespad=1.5, frameon=False)
+    bp.set(xlabel='Spacing', ylabel=y_label);
     
     # Stats
     if p_values:
         y_min = min(data['value'])
         y_max = max(data['value'])
         y = y_min-(y_max-y_min)*0.03
-        for i in range(0,cond_num):
+        for i in range(0,5):
             x1, x2 = -0.2+i, 0.2+i
             stat_str = p2star(p_values[i])
             if stat_str:
@@ -70,7 +69,7 @@ def gen_anova_table(df):
     df['df'] = df['df'].astype(int)
     df['F'] = df['F'].map('{:,.2f}'.format)
     df['sign'] = df['p'].apply(p2star)
-    df.loc[df['p'] < 0.00001, 'p'] = np.nan
+    df['p'][df['p'] < 0.00001] = np.nan
     df['p'] = df['p'].map('{:,.5f}'.format).replace({'nan': '< 0.00001'})
     
     # Plot table
@@ -97,8 +96,8 @@ def gen_ph_table(df):
     df['SE'] = df['SE'].map('{:,.4f}'.format)
     df['z'] = df['z'].map('{:,.4f}'.format)
     df['sign'] = df['p'].map(p2star)
-    # df.loc[df['p'] < 0.00001, 'p'] = np.nan
-    df['p'] = df['p'].map('{:,.5g}'.format).replace({'nan': '< 0.00001'})
+    df['p'][df['p'] < 0.00001] = np.nan
+    df['p'] = df['p'].map('{:,.5f}'.format).replace({'nan': '< 0.00001'})
     
     # Plot table
     the_table = plt.table(cellText=df[['estimate', 'SE', 'z', 'p', 'sign']].values,
@@ -114,25 +113,42 @@ def gen_ph_table(df):
     the_table.auto_set_font_size(False)
     the_table.set_fontsize(10)
     the_table.scale(1.5, 1.5)
+         
+# Load ET data
+data = pd.read_excel(p['data_path'], sheet_name=p['cond_names'], index_col='Measures/Subjects')
+data = dict((k, v.transpose()) for k, v in data.items())
+data = pd.concat(data)
+data.reset_index(level=0, inplace=True)
 
-# Load data
-data = pd.read_csv(p['data_path'])
-data_long = pd.melt(data, id_vars=['group', 'condition', 'subj_id'], var_name = 'measure', value_name = 'value')
+# Filter data
+data = data.loc[p['subjects']['control']+p['subjects']['dyslexic'], :]
+data = data.dropna()
+
+# Rename groups
+data.reset_index(level=0, inplace=True)
+data = data.rename(columns={'level_0':'spacing', 'index':'subid', 'Group':'group'})
+data['group'] = data['group'].astype('int32').astype('category').replace({1: 'dyslexic', 2: 'control'})
+data_long = pd.melt(data, id_vars=['group','spacing','subid'], var_name = 'measure', value_name = 'value')
 
 # %% Generate pdf from figures
-cond_num = len(data_long.condition.unique())
-for type in range(1):        
-    with PdfPages(p['reports_dir'] + '/mixed_ANOVA_report.pdf') as pdf:        
-        for meas_name in p['meas_list']:
+for type in range(2):
+    if type == 0:
+        meas_list = p['meas_list']
+        type_str = ''
+    else:
+        meas_list = p['meas_list_all']
+        type_str = '_all'
+        
+    with PdfPages(p['reports_dir'] + '/ET_stats_report' + type_str + '.pdf') as pdf:        
+        for meas_name in meas_list:
             # Load R stats
-            anova_stats = pyreadr.read_r(p['stats_dir'] + '/mixed_ANOVA_' + meas_name + '.RData')
+            anova_stats = pyreadr.read_r(p['stats_dir'] + '/ET_mixed_ANOVA_' + meas_name + '.RData')
             
             # Boxplot
             fig = plt.figure(figsize=(16, 13))
             fig.add_axes([0.06, 0.5, 0.4, 0.4])
             y_label = ''
-            boxplot_condition_group(data_long[data_long['measure'] == meas_name], 
-                                    y_label, cond_num, list(anova_stats['ph_summary']['p.value'][:cond_num]))
+            boxplot_spacing_group(data_long[data_long['measure'] == meas_name], y_label, list(anova_stats['ph_summary']['p.value'][:5]))
             plt.title(meas_name)
             
             # ANOVA table
@@ -144,15 +160,15 @@ for type in range(1):
             gen_ph_table(anova_stats['ph_summary'])
             
             # %%Histograms
-            for sp in range(1,cond_num+1):
+            for sp in range(1,6):
                 ax = fig.add_axes([-0.165+sp*0.2, 0.06, 0.16, 0.16])
                 for gp in ['control', 'dyslexic']:
-                    x = data[(data.condition == ('SP'+str(sp))) & (data.group == gp)][meas_name]
+                    x = data[(data.spacing == ('SP'+str(sp))) & (data.group == gp)][meas_name]
                     sns.distplot(x, bins=8, label=gp, ax=ax)
                     plt.axvline(x.mean(), color='b' if gp == 'control' else 'r', linestyle='dashed', linewidth=1)
                     plt.title('SP'+str(sp))
             
             # Save fig as pdf page
             pdf.savefig()
-            # plt.close()
+            plt.close()
 
